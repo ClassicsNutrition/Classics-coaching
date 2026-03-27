@@ -1,0 +1,356 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+/* ============================================================
+   CLASSICS COACHING — Miami Vice Design System
+   ============================================================ */
+
+:root {
+  /* Miami Vice Palette */
+  --miami-pink: #FF2D78;
+  --miami-pink-light: #FF6BA3;
+  --miami-pink-dark: #CC1155;
+  --miami-cyan: #00F5FF;
+  --miami-cyan-light: #66F9FF;
+  --miami-cyan-dark: #00C4CC;
+  --miami-purple: #7B2FBE;
+  --miami-purple-light: #A855F7;
+  --miami-night: #06060F;
+  --miami-dusk: #0D0D1A;
+  --miami-card: #111128;
+  --miami-border: rgba(255, 45, 120, 0.15);
+
+  /* Typography */
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--miami-night);
+  color: #e2e8f0;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   NEON GLOW UTILITIES
+   ============================================================ */
+.glow-pink {
+  box-shadow: 0 0 20px rgba(255, 45, 120, 0.4), 0 0 60px rgba(255, 45, 120, 0.1);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4), 0 0 60px rgba(0, 245, 255, 0.1);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(123, 47, 190, 0.4), 0 0 60px rgba(123, 47, 190, 0.1);
+}
+
+.text-glow-pink {
+  text-shadow: 0 0 20px rgba(255, 45, 120, 0.8), 0 0 40px rgba(255, 45, 120, 0.4);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 20px rgba(0, 245, 255, 0.8), 0 0 40px rgba(0, 245, 255, 0.4);
+}
+
+/* ============================================================
+   GRADIENT UTILITIES
+   ============================================================ */
+.gradient-miami {
+  background: linear-gradient(135deg, var(--miami-pink) 0%, var(--miami-purple) 50%, var(--miami-cyan) 100%);
+}
+
+.gradient-miami-text {
+  background: linear-gradient(135deg, var(--miami-pink) 0%, var(--miami-purple-light) 50%, var(--miami-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-dark {
+  background: linear-gradient(180deg, var(--miami-night) 0%, var(--miami-dusk) 100%);
+}
+
+/* ============================================================
+   GLASSMORPHISM CARD
+   ============================================================ */
+.card-glass {
+  background: rgba(17, 17, 40, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 45, 120, 0.12);
+  border-radius: 16px;
+}
+
+.card-glass-hover {
+  transition: all 0.3s ease;
+}
+
+.card-glass-hover:hover {
+  border-color: rgba(255, 45, 120, 0.35);
+  box-shadow: 0 8px 32px rgba(255, 45, 120, 0.15), 0 0 0 1px rgba(255, 45, 120, 0.1);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--miami-pink) 0%, var(--miami-purple) 100%);
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(255, 45, 120, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 45, 120, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--miami-cyan);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 11px 28px;
+  border-radius: 12px;
+  border: 1.5px solid var(--miami-cyan);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 245, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 245, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.7);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.1);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.btn-ghost:hover {
+  background: rgba(226, 232, 240, 0.05);
+  color: rgba(226, 232, 240, 0.95);
+  border-color: rgba(226, 232, 240, 0.2);
+}
+
+/* ============================================================
+   FORM INPUTS
+   ============================================================ */
+.input-miami {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 45, 120, 0.15);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #e2e8f0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+.input-miami::placeholder {
+  color: rgba(226, 232, 240, 0.35);
+}
+
+.input-miami:focus {
+  border-color: var(--miami-pink);
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.label-miami {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.75);
+  margin-bottom: 8px;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   ANIMATED BACKGROUND GRID
+   ============================================================ */
+.miami-grid-bg {
+  background-image:
+    linear-gradient(rgba(255, 45, 120, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 45, 120, 0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 45, 120, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 45, 120, 0.6), 0 0 60px rgba(255, 45, 120, 0.2); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  0% { opacity: 0; transform: translateX(-24px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fadeInUp { animation: fadeInUp 0.6s ease forwards; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--miami-dusk); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--miami-pink), var(--miami-purple));
+  border-radius: 3px;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ============================================================
+   BADGE
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-pink {
+  background: rgba(255, 45, 120, 0.15);
+  color: var(--miami-pink-light);
+  border: 1px solid rgba(255, 45, 120, 0.25);
+}
+
+.badge-cyan {
+  background: rgba(0, 245, 255, 0.1);
+  color: var(--miami-cyan);
+  border: 1px solid rgba(0, 245, 255, 0.2);
+}
+
+.badge-green {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badge-yellow {
+  background: rgba(234, 179, 8, 0.12);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+.divider-miami {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--miami-pink), transparent);
+  border: none;
+  margin: 24px 0;
+  opacity: 0.4;
+}
+
+/* ============================================================
+   NEON BORDER ANIMATION
+   ============================================================ */
+.neon-border {
+  position: relative;
+}
+
+.neon-border::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--miami-pink), var(--miami-purple), var(--miami-cyan));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.neon-border:hover::after {
+  opacity: 1;
+}
