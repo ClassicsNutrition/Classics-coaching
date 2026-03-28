@@ -248,15 +248,13 @@ export default async function HomePage() {
       <section style={{ padding: '0 24px 80px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <a href="https://classicsnutrition.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-            <div className="gradient-miami" style={{
+            <div className="gradient-miami hover-lift" style={{
               borderRadius: 20, padding: '48px 48px',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               flexWrap: 'wrap', gap: 24,
               boxShadow: '0 20px 60px rgba(255,45,120,0.3)',
               transition: 'transform 0.3s ease, box-shadow 0.3s ease',
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
             >
               <div>
                 <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
