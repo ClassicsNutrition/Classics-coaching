@@ -41,13 +41,8 @@ export default function RegisterPage() {
       <div style={{ position: 'fixed', top: '15%', right: '10%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,47,190,0.15) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
 
       <div className="card-glass animate-fadeInUp" style={{ width: '100%', maxWidth: 440, padding: 48 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 36 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #FF2D78, #7B2FBE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Zap size={18} color="white" />
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', color: 'white' }}>
-            Classics <span style={{ color: 'var(--miami-pink)' }}>Coaching</span>
-          </span>
+        <Link href="/" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textDecoration: 'none', marginBottom: 32 }}>
+          <img src="/logo.png" alt="Classics Coaching" style={{ height: 60, width: 'auto' }} />
         </Link>
 
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 800, color: 'white', marginBottom: 8 }}>

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { Zap, Users, BookOpen, Dumbbell, Clock, TrendingUp, Settings } from 'lucide-react';
+import { Users, BookOpen, Dumbbell, Clock, TrendingUp, Settings } from 'lucide-react';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -31,9 +31,7 @@ export default async function AdminDashboard() {
       {/* Sidebar */}
       <aside style={{ width: 240, borderRight: '1px solid rgba(255,45,120,0.1)', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 4, position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', background: 'rgba(6,6,15,0.95)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 32, padding: '0 8px' }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'linear-gradient(135deg, #FF2D78, #7B2FBE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Zap size={16} color="white" />
-          </div>
+          <img src="/logo.png" alt="Classics Coaching" style={{ height: 32, width: 'auto' }} />
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'white' }}>
             Admin <span style={{ color: 'var(--miami-pink)' }}>Panel</span>
           </span>

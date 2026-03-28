@@ -30,12 +30,7 @@ export default async function ProgramsPage() {
       {/* Nav */}
       <nav style={{ borderBottom: '1px solid rgba(0,245,255,0.1)', padding: '0 24px', height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(6,6,15,0.9)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'linear-gradient(135deg, #00F5FF, #7B2FBE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Zap size={16} color="white" />
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: 'white' }}>
-            Classics <span style={{ color: 'var(--miami-cyan)' }}>Coaching</span>
-          </span>
+          <img src="/logo.png" alt="Classics Coaching" style={{ height: 40, width: 'auto' }} />
         </Link>
         {user ? (
           <Link href="/profile" className="btn-ghost" style={{ fontSize: '0.85rem' }}>Mon Espace</Link>

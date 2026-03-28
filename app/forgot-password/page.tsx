@@ -24,13 +24,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen miami-grid-bg" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: 'var(--miami-night)' }}>
       <div className="card-glass animate-fadeInUp" style={{ width: '100%', maxWidth: 420, padding: 48 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 36 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #FF2D78, #7B2FBE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Zap size={18} color="white" />
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', color: 'white' }}>
-            Classics <span style={{ color: 'var(--miami-pink)' }}>Coaching</span>
-          </span>
+        <Link href="/" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textDecoration: 'none', marginBottom: 32 }}>
+          <img src="/logo.png" alt="Classics Coaching" style={{ height: 60, width: 'auto' }} />
         </Link>
 
         {sent ? (

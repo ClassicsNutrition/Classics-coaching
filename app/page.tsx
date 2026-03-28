@@ -17,17 +17,7 @@ export default async function HomePage() {
       }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 70 }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: 'linear-gradient(135deg, #FF2D78, #7B2FBE)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(255,45,120,0.4)',
-            }}>
-              <Zap size={18} color="white" />
-            </div>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.2rem', color: 'white' }}>
-              Classics <span style={{ color: 'var(--miami-pink)' }}>Coaching</span>
-            </span>
+            <img src="/logo.png" alt="Classics Coaching" style={{ height: 45, width: 'auto' }} />
           </Link>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

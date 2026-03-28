@@ -68,10 +68,10 @@ export default function AdminExercisesPage() {
       {/* Sidebar */}
       <aside style={{ width: 240, borderRight: '1px solid rgba(255,45,120,0.1)', padding: '24px 16px', flexShrink: 0, background: 'rgba(6,6,15,0.95)', position: 'sticky', top: 0, height: '100vh' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 32, padding: '0 8px' }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'linear-gradient(135deg, #FF2D78, #7B2FBE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Zap size={16} color="white" />
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'white' }}>Admin <span style={{ color: 'var(--miami-pink)' }}>Panel</span></span>
+          <img src="/logo.png" alt="Classics Coaching" style={{ height: 32, width: 'auto' }} />
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'white' }}>
+            Admin <span style={{ color: 'var(--miami-pink)' }}>Panel</span>
+          </span>
         </Link>
         {[
           { href: '/admin', label: 'Dashboard', icon: <TrendingUp size={18} /> },
