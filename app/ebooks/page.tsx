@@ -1,11 +1,18 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { BookOpen, Lock, ArrowRight, ChevronLeft } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 export default async function EbooksPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    isAdmin = profile?.role === 'admin';
+  }
+
   const { data: ebooks } = await supabase
     .from('ebooks')
     .select('id, slug, title, description, cover_url, theme_primary, theme_accent')
@@ -27,17 +34,7 @@ export default async function EbooksPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--miami-night)' }}>
-      {/* Nav */}
-      <nav style={{ borderBottom: '1px solid rgba(255,45,120,0.1)', padding: '0 24px', height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(6,6,15,0.9)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logo.png" alt="Classics Coaching" style={{ height: 40, width: 'auto' }} />
-        </Link>
-        {user ? (
-          <Link href="/profile" className="btn-ghost" style={{ fontSize: '0.85rem' }}>Mon Espace</Link>
-        ) : (
-          <Link href="/login" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px' }}>Connexion</Link>
-        )}
-      </nav>
+      <Navbar user={user} isAdmin={isAdmin} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px' }}>
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(226,232,240,0.5)', fontSize: '0.85rem', textDecoration: 'none', marginBottom: 32 }}>

@@ -1,40 +1,21 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { BookOpen, Dumbbell, Star, ArrowRight, Zap, Heart, ShoppingBag, ChevronRight } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    isAdmin = profile?.role === 'admin';
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--miami-night)' }}>
-      {/* Navigation */}
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        background: 'rgba(6, 6, 15, 0.85)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 45, 120, 0.1)',
-      }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 70 }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <img src="/logo.png" alt="Classics Coaching" style={{ height: 45, width: 'auto' }} />
-          </Link>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Link href="/ebooks" className="btn-ghost" style={{ fontSize: '0.9rem' }}>E-books</Link>
-            <Link href="/programs" className="btn-ghost" style={{ fontSize: '0.9rem' }}>Programmes</Link>
-            <a href="https://classicsnutrition.com" target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ fontSize: '0.9rem' }}>Boutique</a>
-            {user ? (
-              <Link href="/profile" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.85rem' }}>Mon Espace</Link>
-            ) : (
-              <>
-                <Link href="/login" className="btn-ghost" style={{ fontSize: '0.9rem' }}>Connexion</Link>
-                <Link href="/register" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.85rem' }}>Commencer</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <Navbar user={user} isAdmin={isAdmin} />
 
       {/* Hero Section */}
       <section className="miami-grid-bg" style={{ paddingTop: 160, paddingBottom: 120, position: 'relative', overflow: 'hidden' }}>
@@ -179,16 +160,16 @@ export default async function HomePage() {
       </section>
 
       {/* About / CTA Section */}
-      <section style={{ padding: '80px 24px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div className="card-glass" style={{ padding: '64px 48px', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ padding: '60px 0' }}>
+        <div className="container-responsive" style={{ maxWidth: 1280, margin: '0 auto' }}>
+          <div className="card-glass" style={{ padding: '40px 24px', position: 'relative', overflow: 'hidden' }}>
             <div style={{
               position: 'absolute', top: -100, right: -100, width: 400, height: 400,
               borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(123,47,190,0.2) 0%, transparent 70%)',
               pointerEvents: 'none',
             }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 48, alignItems: 'center', position: 'relative', zIndex: 1 }}>
               <div>
                 <div className="badge badge-pink" style={{ marginBottom: 20 }}>
                   <Star size={12} /> SMAIN CHEBAB
@@ -234,14 +215,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Supplements Banner */}
-      <section style={{ padding: '0 24px 80px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+      <section style={{ padding: '0 0 60px' }}>
+        <div className="container-responsive" style={{ maxWidth: 1280, margin: '0 auto' }}>
           <a href="https://classicsnutrition.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
             <div className="gradient-miami hover-lift" style={{
-              borderRadius: 20, padding: '48px 48px',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              flexWrap: 'wrap', gap: 24,
+              borderRadius: 20, padding: '32px 24px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexDirection: 'column', textAlign: 'center',
+              gap: 24,
               boxShadow: '0 20px 60px rgba(255,45,120,0.3)',
               transition: 'transform 0.3s ease, box-shadow 0.3s ease',
             }}

@@ -101,9 +101,9 @@ export default function AdminEbookEditorPage({ params }: Props) {
   if (!ebook) return <div style={{ color: 'white', padding: 40 }}>E-book introuvable.</div>;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--miami-night)', display: 'flex' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--miami-night)', display: 'flex', flexDirection: 'row' }} className="editor-container">
       {/* Sidebar for Editor - Simplified */}
-      <aside style={{ width: 300, borderRight: '1px solid rgba(255,45,120,0.1)', background: 'rgba(6,6,15,0.95)', display: 'flex', flexDirection: 'column' }}>
+      <aside className="editor-sidebar" style={{ width: 300, borderRight: '1px solid rgba(255,45,120,0.1)', background: 'rgba(6,6,15,0.95)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
         <div style={{ padding: 24, borderBottom: '1px solid rgba(255,45,120,0.1)' }}>
           <Link href="/admin/ebooks" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(226,232,240,0.5)', textDecoration: 'none', fontSize: '0.8rem', marginBottom: 16 }}>
             <ArrowLeft size={14} /> Retour
@@ -146,8 +146,7 @@ export default function AdminEbookEditorPage({ params }: Props) {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main style={{ flex: 1, height: '100vh', overflowY: 'auto', padding: '40px' }}>
+      <main style={{ flex: 1, height: '100vh', overflowY: 'auto', padding: '24px' }}>
         {tab === 'editor' ? (
           <div style={{ maxWidth: 900, margin: '0 auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
@@ -270,6 +269,13 @@ export default function AdminEbookEditorPage({ params }: Props) {
           </div>
         )}
       </main>
+      <style jsx>{`
+        @media (max-width: 1024px) {
+          .editor-container { flex-direction: column !important; }
+          .editor-sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(255,45,120,0.1); }
+          main { height: auto !important; }
+        }
+      `}</style>
     </div>
   );
 

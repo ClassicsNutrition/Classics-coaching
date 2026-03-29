@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { LogOut, BookOpen, Dumbbell, User, Clock } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -17,46 +18,42 @@ export default async function ProfilePage() {
     .single();
 
   // Get reservations with content details
-  const { data: reservations } = await supabase
+  const { data: qRes } = await supabase
     .from('reservations')
-    .select('*')
+    .select(`
+      *,
+      ebooks(title, slug),
+      programs(title, slug)
+    `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  const grantedEbooks = reservations?.filter(r => r.content_type === 'ebook' && r.status === 'granted') ?? [];
-  const grantedPrograms = reservations?.filter(r => r.content_type === 'program' && r.status === 'granted') ?? [];
-  const pendingCount = reservations?.filter(r => r.status === 'pending').length ?? 0;
+  const reservations = qRes || [];
+  const grantedEbooks = reservations.filter((r: any) => r.content_type === 'ebook' && r.status === 'granted');
+  const grantedPrograms = reservations.filter((r: any) => r.content_type === 'program' && r.status === 'granted');
+  const pendingCount = reservations.filter((r: any) => r.status === 'pending').length;
 
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'Client';
   const joinDate = new Date(user.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--miami-night)' }}>
-      {/* Nav */}
-      <nav style={{ borderBottom: '1px solid rgba(255,45,120,0.1)', padding: '0 24px', height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(6,6,15,0.9)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logo.png" alt="Classics Coaching" style={{ height: 40, width: 'auto' }} />
-        </Link>
-        <form action="/auth/signout" method="post">
-          <button type="submit" className="btn-ghost" style={{ fontSize: '0.85rem' }}>
-            <LogOut size={14} /> Déconnexion
-          </button>
-        </form>
-      </nav>
+      <Navbar user={user} isAdmin={profile?.role === 'admin'} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px' }}>
         {/* Profile Header */}
-        <div className="card-glass animate-fadeInUp" style={{ padding: 40, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
+        <div className="card-glass animate-fadeInUp" style={{ padding: 'clamp(24px, 5vw, 40px)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
           <div style={{
             width: 80, height: 80, borderRadius: '50%',
             background: 'linear-gradient(135deg, #FF2D78, #7B2FBE)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '2rem', fontWeight: 800, color: 'white',
             boxShadow: '0 0 30px rgba(255,45,120,0.4)',
+            flexShrink: 0
           }}>
             {displayName.charAt(0).toUpperCase()}
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: '1 1 300px' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 800, color: 'white', marginBottom: 4 }}>
               Bonjour, {displayName} 👋
             </h1>
@@ -67,7 +64,7 @@ export default async function ProfilePage() {
               <span className="badge badge-pink" style={{ marginTop: 10, display: 'inline-flex' }}>Admin</span>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 24 }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {[
               { value: grantedEbooks.length, label: 'E-books', icon: <BookOpen size={16} /> },
               { value: grantedPrograms.length, label: 'Programmes', icon: <Dumbbell size={16} /> },
@@ -83,9 +80,9 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
           {/* E-books */}
-          <div className="card-glass animate-fadeInUp animate-delay-100" style={{ padding: 32 }}>
+          <div className="card-glass animate-fadeInUp animate-delay-100" style={{ padding: 'clamp(24px, 4vw, 32px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,45,120,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-pink)' }}>
                 <BookOpen size={20} />
@@ -104,7 +101,7 @@ export default async function ProfilePage() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {grantedEbooks.map(r => (
-                  <Link key={r.id} href={`/ebooks/${r.content_id}`} style={{
+                  <Link key={r.id} href={`/ebooks/${r.ebooks?.slug || r.content_id}`} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '14px 16px',
                     background: 'rgba(255,45,120,0.06)',
@@ -112,8 +109,8 @@ export default async function ProfilePage() {
                     borderRadius: 10, textDecoration: 'none',
                     transition: 'all 0.2s',
                   }}>
-                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>E-book #{r.content_id.slice(-6)}</span>
-                    <span className="badge badge-green">Accès accordé</span>
+                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>{r.ebooks?.title || `E-book #${r.content_id.slice(-6)}`}</span>
+                    <span className="badge badge-green">Voir</span>
                   </Link>
                 ))}
               </div>
@@ -121,7 +118,7 @@ export default async function ProfilePage() {
           </div>
 
           {/* Programs */}
-          <div className="card-glass animate-fadeInUp animate-delay-200" style={{ padding: 32 }}>
+          <div className="card-glass animate-fadeInUp animate-delay-200" style={{ padding: 'clamp(24px, 4vw, 32px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(0,245,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-cyan)' }}>
                 <Dumbbell size={20} />
@@ -140,7 +137,7 @@ export default async function ProfilePage() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {grantedPrograms.map(r => (
-                  <Link key={r.id} href={`/programs/${r.content_id}`} style={{
+                  <Link key={r.id} href={`/programs/${r.programs?.slug || r.content_id}`} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '14px 16px',
                     background: 'rgba(0,245,255,0.06)',
@@ -148,8 +145,8 @@ export default async function ProfilePage() {
                     borderRadius: 10, textDecoration: 'none',
                     transition: 'all 0.2s',
                   }}>
-                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>Programme #{r.content_id.slice(-6)}</span>
-                    <span className="badge badge-cyan">Accès accordé</span>
+                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>{r.programs?.title || `Programme #${r.content_id.slice(-6)}`}</span>
+                    <span className="badge badge-cyan">Voir</span>
                   </Link>
                 ))}
               </div>
