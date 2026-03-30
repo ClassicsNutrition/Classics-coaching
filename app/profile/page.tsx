@@ -63,6 +63,11 @@ export default async function ProfilePage() {
             {profile?.role === 'admin' && (
               <span className="badge badge-pink" style={{ marginTop: 10, display: 'inline-flex' }}>Admin</span>
             )}
+            <form action="/auth/signout" method="post" style={{ marginTop: 16 }}>
+              <button type="submit" className="btn-ghost" style={{ padding: '10px 16px', fontSize: '0.85rem', border: '1px solid rgba(255,45,120,0.2)' }}>
+                <LogOut size={16} /> Déconnexion
+              </button>
+            </form>
           </div>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {[

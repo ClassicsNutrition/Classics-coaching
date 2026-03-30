@@ -48,9 +48,16 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
           <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', margin: '0 8px' }} />
           
           {user ? (
-            <Link href="/profile" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px' }}>
-              <User size={16} /> Mon Espace
-            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Link href="/profile" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px' }}>
+                <User size={16} /> Mon Espace
+              </Link>
+              <form action="/auth/signout" method="post">
+                <button type="submit" className="btn-ghost" style={{ padding: '8px', borderRadius: '10px', color: 'rgba(226,232,240,0.5)' }} title="Déconnexion">
+                  <LogOut size={18} />
+                </button>
+              </form>
+            </div>
           ) : (
             <Link href="/login" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px' }}>
               Connexion
