@@ -11,7 +11,7 @@ export default async function HomePage() {
   let isAdmin = false;
   if (user) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    isAdmin = profile?.role === 'admin';
+  isAdmin = profile?.role === 'admin' || user.app_metadata?.role === 'admin';
   }
 
   return (

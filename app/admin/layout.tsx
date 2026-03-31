@@ -21,7 +21,7 @@ export default async function AdminLayout({
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'admin') {
+  if (profile?.role !== 'admin' && user.app_metadata?.role !== 'admin') {
     redirect('/profile');
   }
 

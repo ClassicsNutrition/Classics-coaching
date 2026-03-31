@@ -39,7 +39,7 @@ export default async function ProfilePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--miami-night)' }}>
-      <Navbar user={user} isAdmin={profile?.role === 'admin'} />
+      <Navbar user={user} isAdmin={profile?.role === 'admin' || user.app_metadata?.role === 'admin'} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px' }}>
         {/* Profile Header */}
@@ -61,7 +61,7 @@ export default async function ProfilePage() {
             <p style={{ color: 'rgba(226,232,240,0.5)', fontSize: '0.9rem' }}>
               {user.email} · Membre depuis {joinDate}
             </p>
-            {profile?.role === 'admin' && (
+            {(profile?.role === 'admin' || user.app_metadata?.role === 'admin') && (
               <span className="badge badge-pink" style={{ marginTop: 10, display: 'inline-flex' }}>Admin</span>
             )}
             <form action="/auth/signout" method="post" style={{ marginTop: 16 }}>
@@ -161,7 +161,7 @@ export default async function ProfilePage() {
         </div>
 
         {/* Admin link */}
-        {profile?.role === 'admin' && (
+        {(profile?.role === 'admin' || user.app_metadata?.role === 'admin') && (
           <div className="card-glass animate-fadeInUp" style={{ padding: 24, marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,45,120,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-pink)' }}>
