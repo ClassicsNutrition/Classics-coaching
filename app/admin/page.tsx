@@ -8,9 +8,6 @@ export default async function AdminDashboard() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (profile?.role !== 'admin') redirect('/profile');
-
   // Stats
   const [{ count: usersCount }, { count: ebooksCount }, { count: programsCount }, { count: pendingCount }] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
