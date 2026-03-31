@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   full_name TEXT,
   avatar_url TEXT,
   role TEXT NOT NULL DEFAULT 'client' CHECK (role IN ('client', 'admin')),
+  banned_until TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 

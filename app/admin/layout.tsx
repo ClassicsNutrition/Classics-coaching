@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import AdminSidebar from '@/components/AdminSidebar';
+import AdminSecurityHandler from '@/components/AdminSecurityHandler';
 
 export default async function AdminLayout({
   children,
@@ -26,6 +27,7 @@ export default async function AdminLayout({
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--miami-night)', display: 'flex', flexDirection: 'row' }} className="admin-container">
+      <AdminSecurityHandler sessionToken={user.id} />
       <AdminSidebar />
       <main style={{ flex: 1, overflowY: 'auto', paddingBottom: 40 }} className="admin-main">
         {children}

@@ -9,7 +9,7 @@ import {
 } from '@/lib/blocks';
 import EbookRenderer from '@/components/EbookRenderer';
 import { 
-  ArrowLeft, Save, Plus, Trash2, CheckCircle2, XCircle, 
+  ArrowLeft, Save, Plus, Trash2, CheckCircle2, XCircle, Ban,
   ChevronUp, ChevronDown, UserPlus, Users, FileText, 
   Eye, EyeOff, Zap, Layout, Settings, Dumbbell
 } from 'lucide-react';
@@ -256,14 +256,19 @@ export default function AdminProgramEditorPage({ params }: Props) {
                           <div style={{ color: 'rgba(226,232,240,0.3)', fontSize: '0.75rem' }}>Accordé le {new Date(res.created_at).toLocaleDateString('fr-FR')}</div>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                         <span className={`badge ${res.status === 'granted' ? 'badge-green' : 'badge-yellow'}`}>
-                           {res.status === 'granted' ? 'Accordé' : 'En attente'}
-                         </span>
-                         <button onClick={() => handleDeleteReservation(res.id)} style={{ background: 'none', border: 'none', color: 'rgba(226,232,240,0.3)', cursor: 'pointer' }}>
-                           <Trash2 size={16} />
-                         </button>
-                      </div>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <button 
+                            onClick={() => handleToggleAccess(res.id, res.status)}
+                            className={`badge ${res.status === 'granted' ? 'badge-green' : 'badge-pink'}`}
+                            style={{ cursor: 'pointer', border: 'none' }}
+                          >
+                            {res.status === 'granted' ? <CheckCircle2 size={10} style={{ marginRight: 4 }} /> : <Ban size={10} style={{ marginRight: 4 }} />}
+                            {res.status === 'granted' ? 'Accordé' : 'Révoqué'}
+                          </button>
+                          <button onClick={() => handleDeleteReservation(res.id)} style={{ background: 'none', border: 'none', color: 'rgba(226,232,240,0.3)', cursor: 'pointer' }}>
+                            <Trash2 size={16} />
+                          </button>
+                       </div>
                    </div>
                  ))
                )}
@@ -306,8 +311,14 @@ export default function AdminProgramEditorPage({ params }: Props) {
     setGrantLoading('');
   }
 
+  async function handleToggleAccess(id: string, currentStatus: string) {
+    const newStatus = currentStatus === 'granted' ? 'revoked' : 'granted';
+    const { error } = await supabase.from('reservations').update({ status: newStatus }).eq('id', id);
+    if (!error) loadReservations(program.id);
+  }
+
   async function handleDeleteReservation(id: string) {
-    if (!confirm('Supprimer cet accès ?')) return;
+    if (!confirm('Supprimer définitivement cet accès ?')) return;
     await supabase.from('reservations').delete().eq('id', id);
     loadReservations(program.id);
   }
@@ -405,7 +416,94 @@ function renderBlockEditor(block: Block, onUpdate: (patch: any) => void) {
         </div>
       );
     case 'table':
-      return <p style={{ color: 'rgba(226,232,240,0.4)', fontSize: '0.85rem' }}>L&apos;éditeur de tableau sera disponible prochainement. Pour l&apos;instant, les tableaux sont statiques.</p>;
+      return (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 16 }}>
+            <thead>
+              <tr>
+                {block.headers.map((h, ci) => (
+                  <th key={ci} style={{ padding: 8 }}>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <input 
+                        className="input-miami" 
+                        value={h} 
+                        onChange={e => {
+                          const newHeaders = [...block.headers];
+                          newHeaders[ci] = e.target.value;
+                          onUpdate({ headers: newHeaders });
+                        }}
+                        style={{ fontSize: '0.8rem', fontWeight: 800 }}
+                      />
+                      <button 
+                        onClick={() => {
+                          const newHeaders = block.headers.filter((_, i) => i !== ci);
+                          const newRows = block.rows.map(r => r.filter((_, i) => i !== ci));
+                          onUpdate({ headers: newHeaders, rows: newRows });
+                        }}
+                        className="btn-ghost" style={{ padding: 4, color: 'var(--miami-pink)' }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </th>
+                ))}
+                <th style={{ width: 40 }}>
+                  <button 
+                    onClick={() => {
+                      onUpdate({ 
+                        headers: [...block.headers, `Col ${block.headers.length + 1}`],
+                        rows: block.rows.map(r => [...r, ''])
+                      });
+                    }}
+                    className="btn-ghost" style={{ padding: 8 }}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, ri) => (
+                <tr key={ri}>
+                  {row.map((cell, ci) => (
+                    <td key={ci} style={{ padding: 8 }}>
+                      <input 
+                        className="input-miami" 
+                        value={cell} 
+                        onChange={e => {
+                          const newRows = [...block.rows];
+                          newRows[ri][ci] = e.target.value;
+                          onUpdate({ rows: newRows });
+                        }}
+                        style={{ fontSize: '0.85rem' }}
+                      />
+                    </td>
+                  ))}
+                  <td style={{ textAlign: 'center' }}>
+                    <button 
+                      onClick={() => {
+                        const newRows = block.rows.filter((_, i) => i !== ri);
+                        onUpdate({ rows: newRows });
+                      }}
+                      className="btn-ghost" style={{ padding: 4, color: 'var(--miami-pink)' }}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button 
+            onClick={() => {
+              onUpdate({ rows: [...block.rows, new Array(block.headers.length).fill('')] });
+            }}
+            className="btn-ghost" style={{ width: '100%', fontSize: '0.75rem' }}
+          >
+            <Plus size={14} /> Ajouter une ligne
+          </button>
+        </div>
+      );
     case 'divider':
       return <p style={{ color: 'rgba(226,232,240,0.4)', fontSize: '0.85rem' }}>Ligne de séparation décorative.</p>;
     default:
