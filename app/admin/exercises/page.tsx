@@ -73,11 +73,18 @@ export default function AdminExercisesPage() {
     setSearchingGiphy(true);
     try {
       const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
+      if (!apiKey) {
+        alert("Clé API Giphy manquante. Si vous venez de l'ajouter sur Vercel, vous devez relancer un déploiement (Redeploy) pour qu'elle soit prise en compte.");
+        setSearchingGiphy(false);
+        return;
+      }
       const res = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(giphySearch)}&limit=12`);
+      if (!res.ok) throw new Error(`Giphy API error: ${res.status}`);
       const { data } = await res.json();
       setGiphyResults(data || []);
     } catch (err) {
       console.error('Giphy error:', err);
+      alert("Erreur lors de la recherche Giphy. Vérifiez votre clé API.");
     }
     setSearchingGiphy(false);
   }
