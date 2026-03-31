@@ -1,20 +1,20 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { Users, BookOpen, Dumbbell, Clock, TrendingUp, Settings } from 'lucide-react';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
+  const adminSupabase = await createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // Stats
   // Stats with fallbacks to 0
   const [uRes, eRes, pRes, rRes] = await Promise.all([
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
-    supabase.from('ebooks').select('*', { count: 'exact', head: true }),
-    supabase.from('programs').select('*', { count: 'exact', head: true }),
-    supabase.from('reservations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    adminSupabase.from('profiles').select('*', { count: 'exact', head: true }),
+    adminSupabase.from('ebooks').select('*', { count: 'exact', head: true }),
+    adminSupabase.from('programs').select('*', { count: 'exact', head: true }),
+    adminSupabase.from('reservations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
   ]);
 
   const stats = [
