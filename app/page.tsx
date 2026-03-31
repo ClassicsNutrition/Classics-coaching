@@ -1,4 +1,5 @@
 import Link from 'next/link';
+export const revalidate = 0;
 import { createClient } from '@/lib/supabase/server';
 import { BookOpen, Dumbbell, Star, ArrowRight, Zap, Heart, ShoppingBag, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';

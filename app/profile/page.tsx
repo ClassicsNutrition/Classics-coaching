@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+export const revalidate = 0;
 import { createClient } from '@/lib/supabase/server';
 import { LogOut, BookOpen, Dumbbell, User, Clock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
