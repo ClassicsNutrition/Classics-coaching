@@ -17,6 +17,11 @@ export default function AdminExercisesPage() {
   const [editingEx, setEditingEx] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
+  const [giphySearch, setGiphySearch] = useState('');
+  const [giphyResults, setGiphyResults] = useState<any[]>([]);
+  const [searchingGiphy, setSearchingGiphy] = useState(false);
+  const [showGiphyOverlay, setShowGiphyOverlay] = useState(false);
+
   useEffect(() => {
     loadExercises();
   }, []);
@@ -61,6 +66,20 @@ export default function AdminExercisesPage() {
     if (!confirm('Supprimer cet exercice ?')) return;
     await supabase.from('exercises').delete().eq('id', id);
     loadExercises();
+  }
+
+  async function handleGiphySearch() {
+    if (!giphySearch) return;
+    setSearchingGiphy(true);
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
+      const res = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(giphySearch)}&limit=12`);
+      const { data } = await res.json();
+      setGiphyResults(data || []);
+    } catch (err) {
+      console.error('Giphy error:', err);
+    }
+    setSearchingGiphy(false);
   }
 
   return (
@@ -146,7 +165,12 @@ export default function AdminExercisesPage() {
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', marginBottom: 6 }}>URL du GIF de démonstration</label>
-                <input name="gif_url" className="input-miami" defaultValue={editingEx.gif_url} placeholder="https://..." />
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <input id="ex_gif_url" name="gif_url" className="input-miami" defaultValue={editingEx.gif_url} placeholder="https://..." style={{ flex: 1 }} />
+                  <button type="button" onClick={() => setShowGiphyOverlay(true)} className="btn-secondary" style={{ padding: '0 12px' }}>
+                    <Search size={16} />
+                  </button>
+                </div>
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', marginBottom: 6 }}>Instructions</label>
@@ -156,6 +180,57 @@ export default function AdminExercisesPage() {
                 <Save size={16} /> {saving ? 'Enregistrement...' : 'Enregistrer'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Giphy Search Overlay */}
+      {showGiphyOverlay && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className="card-glass" style={{ width: '100%', maxWidth: 600, height: '80vh', display: 'flex', flexDirection: 'column', padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 style={{ color: 'white', fontWeight: 800 }}>Rechercher un GIF</h3>
+              <button onClick={() => setShowGiphyOverlay(false)} style={{ color: 'white', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+              <input 
+                className="input-miami" 
+                placeholder="Ex: bench press..." 
+                value={giphySearch}
+                onChange={e => setGiphySearch(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleGiphySearch()}
+                style={{ flex: 1 }}
+              />
+              <button onClick={handleGiphySearch} disabled={searchingGiphy} className="btn-primary">
+                {searchingGiphy ? '...' : <Search size={18} />}
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 12 }}>
+              {giphyResults.map(gif => (
+                <div 
+                  key={gif.id} 
+                  onClick={() => {
+                    const input = document.getElementById('ex_gif_url') as HTMLInputElement;
+                    if (input) input.value = gif.images.fixed_height.url;
+                    setShowGiphyOverlay(false);
+                  }}
+                  style={{ cursor: 'pointer', borderRadius: 8, overflow: 'hidden', height: 130, border: '2px solid transparent', transition: 'all 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--miami-cyan)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}
+                >
+                  <img src={gif.images.fixed_height_small.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ))}
+              {giphyResults.length === 0 && !searchingGiphy && (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'rgba(255,255,255,0.3)', marginTop: 40 }}>
+                  Entrez un mot-clé pour rechercher un GIF.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
