@@ -4,7 +4,6 @@ export const revalidate = 0;
 import { createClient } from '@/lib/supabase/server';
 import { LogOut, BookOpen, Dumbbell, User, Clock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import ProfileLibrary from '@/components/ProfileLibrary';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -30,14 +29,7 @@ export default async function ProfilePage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  // Get all exercises for the library
-  const { data: qEx } = await supabase
-    .from('exercises')
-    .select('*')
-    .order('name', { ascending: true });
-
   const reservations = qRes || [];
-  const allExercises = qEx || [];
   const grantedEbooks = reservations.filter((r: any) => r.content_type === 'ebook' && r.status === 'granted');
   const grantedPrograms = reservations.filter((r: any) => r.content_type === 'program' && r.status === 'granted');
   const pendingCount = reservations.filter((r: any) => r.status === 'pending').length;
@@ -94,14 +86,14 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'start' }}>
-          {/* E-books (Left side) */}
-          <div className="card-glass animate-fadeInUp animate-delay-100" style={{ padding: 'clamp(24px, 4vw, 32px)', flex: '1 1 320px', maxWidth: 380 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
+          {/* E-books */}
+          <div className="card-glass animate-fadeInUp animate-delay-100" style={{ padding: 'clamp(24px, 4vw, 32px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,10,94,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-pink)' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,45,120,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-pink)' }}>
                 <BookOpen size={20} />
               </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>Mes E-books</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: 'white' }}>Mes E-books</h2>
             </div>
 
             {grantedEbooks.length === 0 ? (
@@ -118,8 +110,8 @@ export default async function ProfilePage() {
                   <Link key={r.id} href={`/ebooks/${r.ebooks?.slug || r.content_id}`} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '14px 16px',
-                    background: 'rgba(255,10,94,0.06)',
-                    border: '1px solid rgba(255,10,94,0.12)',
+                    background: 'rgba(255,45,120,0.06)',
+                    border: '1px solid rgba(255,45,120,0.1)',
                     borderRadius: 10, textDecoration: 'none',
                     transition: 'all 0.2s',
                   }}>
@@ -131,9 +123,40 @@ export default async function ProfilePage() {
             )}
           </div>
 
-          {/* Library and search (Right side, wider) */}
-          <div style={{ flex: '2 1 500px' }} className="animate-fadeInUp animate-delay-200">
-            <ProfileLibrary grantedPrograms={grantedPrograms} allExercises={allExercises} />
+          {/* Programs */}
+          <div className="card-glass animate-fadeInUp animate-delay-200" style={{ padding: 'clamp(24px, 4vw, 32px)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(0,245,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-cyan)' }}>
+                <Dumbbell size={20} />
+              </div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: 'white' }}>Mes Programmes</h2>
+            </div>
+
+            {grantedPrograms.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 16px', color: 'rgba(226,232,240,0.4)' }}>
+                <Dumbbell size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
+                <p style={{ fontSize: '0.875rem' }}>Aucun programme disponible</p>
+                <Link href="/programs" className="btn-ghost" style={{ marginTop: 12, fontSize: '0.8rem', justifyContent: 'center' }}>
+                  Voir les programmes
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {grantedPrograms.map(r => (
+                  <Link key={r.id} href={`/programs/${r.programs?.slug || r.content_id}`} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '14px 16px',
+                    background: 'rgba(0,245,255,0.06)',
+                    border: '1px solid rgba(0,245,255,0.1)',
+                    borderRadius: 10, textDecoration: 'none',
+                    transition: 'all 0.2s',
+                  }}>
+                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>{r.programs?.title || `Programme #${r.content_id.slice(-6)}`}</span>
+                    <span className="badge badge-cyan">Voir</span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

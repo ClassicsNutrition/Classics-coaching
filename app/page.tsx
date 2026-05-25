@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { BookOpen, Dumbbell, Star, ArrowRight, Zap, Heart, ShoppingBag, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import HomeLibrary from '@/components/HomeLibrary';
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -12,6 +13,21 @@ export default async function HomePage() {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
     isAdmin = profile?.role === 'admin';
   }
+
+  // Fetch published programs
+  const { data: dbPrograms } = await supabase
+    .from('programs')
+    .select('id, title, slug, description, cover_url')
+    .eq('published', true);
+
+  // Fetch all exercises
+  const { data: dbExercises } = await supabase
+    .from('exercises')
+    .select('*')
+    .order('name', { ascending: true });
+
+  const programs = dbPrograms || [];
+  const exercises = dbExercises || [];
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--miami-night)', color: '#F5F0FF' }}>
@@ -248,6 +264,26 @@ export default async function HomePage() {
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* Search & Library Section */}
+      <section style={{ padding: '100px 24px', background: 'rgba(7, 6, 26, 0.4)', borderTop: '1px solid rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
+          <div style={{ textAlign: 'center', marginBottom: 54 }}>
+            <div className="badge badge-cyan" style={{ display: 'inline-flex', marginBottom: 16, letterSpacing: '0.1em' }}>MOUVEMENTS & PLANS</div>
+            <h2 style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
+              fontWeight: 'normal', 
+              letterSpacing: '0.05em',
+              color: 'white',
+              textShadow: '0 0 20px rgba(0,245,255,0.25)'
+            }}>
+              Rechercher un Exercice ou Programme
+            </h2>
+          </div>
+          <HomeLibrary programs={programs} exercises={exercises} />
         </div>
       </section>
 

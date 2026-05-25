@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, Dumbbell, BookOpen, Clock, Play, X, Info } from 'lucide-react';
+import { Search, Dumbbell, Play, X, Info, ArrowRight } from 'lucide-react';
 
 interface Exercise {
   id: string;
@@ -13,37 +13,35 @@ interface Exercise {
   created_at: string;
 }
 
-interface ProgramReservation {
+interface Program {
   id: string;
-  content_id: string;
-  status: string;
-  programs?: {
-    title: string;
-    slug: string;
-  };
+  title: string;
+  slug: string;
+  description?: string;
+  cover_url?: string;
 }
 
-interface ProfileLibraryProps {
-  grantedPrograms: ProgramReservation[];
-  allExercises: Exercise[];
+interface HomeLibraryProps {
+  programs: Program[];
+  exercises: Exercise[];
 }
 
-export default function ProfileLibrary({ grantedPrograms, allExercises }: ProfileLibraryProps) {
+export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState('Tous');
   const [activeExercise, setActiveExercise] = useState<Exercise | null>(null);
 
   // Get unique muscle groups from exercises (excluding empty)
-  const muscleGroups = ['Tous', ...Array.from(new Set(allExercises.map(ex => ex.muscle_group).filter(Boolean))) as string[]];
+  const muscleGroups = ['Tous', ...Array.from(new Set(exercises.map(ex => ex.muscle_group).filter(Boolean))) as string[]];
 
   // Filters
   const matchesSearch = (text: string) => text.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const filteredPrograms = grantedPrograms.filter(p => 
-    p.programs?.title && matchesSearch(p.programs.title)
+  const filteredPrograms = programs.filter(p => 
+    matchesSearch(p.title) || (p.description && matchesSearch(p.description))
   );
 
-  const filteredExercises = allExercises.filter(ex => {
+  const filteredExercises = exercises.filter(ex => {
     const matchesQuery = matchesSearch(ex.name) || (ex.muscle_group && matchesSearch(ex.muscle_group));
     const matchesMuscle = selectedMuscle === 'Tous' || ex.muscle_group === selectedMuscle;
     return matchesQuery && matchesMuscle;
@@ -54,24 +52,25 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32, width: '100%' }}>
       
-      {/* Interactive Search Bar */}
+      {/* Interactive Search Bar Container */}
       <div 
         className="card-glass" 
         style={{ 
-          padding: 24, 
+          padding: '24px 32px', 
           display: 'flex', 
           flexDirection: 'column', 
           gap: 16,
-          border: '1px solid rgba(0, 245, 255, 0.2)',
-          boxShadow: '0 8px 32px rgba(7, 6, 26, 0.5), 0 0 15px rgba(0, 245, 255, 0.05)'
+          border: '1px solid rgba(0, 245, 255, 0.25)',
+          boxShadow: '0 8px 32px rgba(7, 6, 26, 0.5), 0 0 25px rgba(0, 245, 255, 0.08)',
+          borderRadius: 20
         }}
       >
         <div style={{ position: 'relative', width: '100%' }}>
           <Search 
-            size={20} 
+            size={22} 
             style={{ 
               position: 'absolute', 
-              left: 16, 
+              left: 18, 
               top: '50%', 
               transform: 'translateY(-50%)', 
               color: 'var(--miami-cyan)' 
@@ -79,16 +78,16 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
           />
           <input 
             className="input-miami" 
-            placeholder="Rechercher un programme ou un exercice (ex: Développé couché, Pectoraux...)" 
+            placeholder="Rechercher un exercice de musculation ou un programme d'entraînement..." 
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             style={{ 
-              paddingLeft: 48, 
+              paddingLeft: 54, 
               width: '100%', 
-              height: 52, 
-              fontSize: '1rem',
+              height: 56, 
+              fontSize: '1.05rem',
               borderRadius: 14,
-              borderColor: searchTerm ? 'var(--miami-cyan)' : 'rgba(255, 10, 94, 0.2)'
+              borderColor: searchTerm ? 'var(--miami-cyan)' : 'rgba(255, 10, 94, 0.25)'
             }}
           />
           {searchTerm && (
@@ -96,7 +95,7 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
               onClick={() => setSearchTerm('')}
               style={{
                 position: 'absolute',
-                right: 16,
+                right: 18,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 background: 'none',
@@ -112,17 +111,17 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
         </div>
         
         {hasSearch && (
-          <div style={{ fontSize: '0.85rem', color: 'rgba(245, 240, 255, 0.6)' }}>
+          <div style={{ fontSize: '0.9rem', color: 'rgba(245, 240, 255, 0.65)' }}>
             Résultats de recherche pour &quot;<span style={{ color: 'var(--miami-cyan)' }}>{searchTerm}</span>&quot; : 
             {` ${filteredPrograms.length} programme(s) et ${filteredExercises.length} exercice(s) trouvé(s).`}
           </div>
         )}
       </div>
 
-      {/* Main Library Display */}
+      {/* Grid of Results */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 32, alignItems: 'start' }}>
         
-        {/* Left Column: Programs (or Search Results - Programs) */}
+        {/* Left Column: Public Programs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div className="card-glass" style={{ padding: '32px 24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
@@ -140,46 +139,48 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
                 <Dumbbell size={20} />
               </div>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>
-                {hasSearch ? 'Programmes trouvés' : 'Mes Programmes'}
+                {hasSearch ? 'Programmes correspondants' : 'Nos Programmes'}
               </h2>
             </div>
 
             {filteredPrograms.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 16px', color: 'rgba(245, 240, 255, 0.4)' }}>
                 <Dumbbell size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
-                <p style={{ fontSize: '0.9rem' }}>
-                  {hasSearch ? 'Aucun programme correspondant' : 'Aucun programme disponible dans votre espace'}
-                </p>
-                {!hasSearch && (
-                  <Link href="/programs" className="btn-ghost" style={{ marginTop: 16, fontSize: '0.8rem', justifyContent: 'center' }}>
-                    Découvrir les programmes
-                  </Link>
-                )}
+                <p style={{ fontSize: '0.9rem' }}>Aucun programme correspondant</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {filteredPrograms.map(r => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {filteredPrograms.map(p => (
                   <Link 
-                    key={r.id} 
-                    href={`/programs/${r.programs?.slug || r.content_id}`} 
+                    key={p.id} 
+                    href={`/programs/${p.slug}`} 
                     className="hover-lift"
                     style={{
                       display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'space-between',
-                      padding: '16px 20px',
-                      background: 'rgba(0, 245, 255, 0.05)',
+                      flexDirection: 'column',
+                      gap: 8,
+                      padding: '20px',
+                      background: 'rgba(0, 245, 255, 0.04)',
                       border: '1px solid rgba(0, 245, 255, 0.15)',
-                      borderRadius: 12, 
+                      borderRadius: 14, 
                       textDecoration: 'none',
                       transition: 'all 0.3s ease',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                     }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--miami-cyan)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0, 245, 255, 0.15)'}
                   >
-                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
-                      {r.programs?.title || `Programme #${r.content_id.slice(-6)}`}
-                    </span>
-                    <span className="badge badge-cyan" style={{ letterSpacing: '0.05em' }}>Accéder</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-display)', letterSpacing: '0.04em' }}>
+                        {p.title}
+                      </span>
+                      <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>Découvrir <ArrowRight size={10} style={{ marginLeft: 2 }} /></span>
+                    </div>
+                    {p.description && (
+                      <p style={{ fontSize: '0.85rem', color: 'rgba(245, 240, 255, 0.6)', lineHeight: 1.5, margin: 0 }}>
+                        {p.description.length > 90 ? `${p.description.slice(0, 90)}...` : p.description}
+                      </p>
+                    )}
                   </Link>
                 ))}
               </div>
@@ -187,8 +188,8 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
           </div>
         </div>
 
-        {/* Right/Double Column: Exercises Library */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, gridColumn: 'span 1' }} className="hide-tablet:grid-col-span-1">
+        {/* Right Column: Public Exercises Grid */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div className="card-glass" style={{ padding: '32px 24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -206,11 +207,11 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
                   <Play size={20} />
                 </div>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>
-                  Bibliothèque d&apos;Exercices
+                  Exercices Disponibles
                 </h2>
               </div>
               <div className="badge badge-pink" style={{ letterSpacing: '0.05em' }}>
-                {allExercises.length} Mouvements
+                {exercises.length} Mouvements
               </div>
             </div>
 
@@ -256,7 +257,7 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
                 <p style={{ fontSize: '0.9rem' }}>Aucun exercice trouvé</p>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16 }}>
                 {filteredExercises.map(ex => (
                   <div
                     key={ex.id}
@@ -303,7 +304,7 @@ export default function ProfileLibrary({ grantedPrograms, allExercises }: Profil
                         <Dumbbell size={24} style={{ color: 'rgba(245, 240, 255, 0.2)' }} />
                       )}
                       
-                      {/* Play overlay button on hover */}
+                      {/* Play overlay on hover */}
                       <div style={{
                         position: 'absolute', inset: 0, 
                         background: 'rgba(7, 6, 26, 0.4)', 
