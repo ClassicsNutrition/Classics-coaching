@@ -422,3 +422,14 @@ h1, h2, h3, h4, h5, h6 {
 .mobile-nav-link:active {
   color: var(--miami-pink);
 }
+
+.partner-link {
+  color: var(--miami-pink);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.25s ease;
+}
+
+.partner-link:hover {
+  color: var(--miami-pink-light);
+}

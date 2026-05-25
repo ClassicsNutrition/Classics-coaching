@@ -432,14 +432,7 @@ export default async function HomePage() {
               href="https://classicsnutrition.com" 
               target="_blank" 
               rel="noopener noreferrer" 
-              style={{ 
-                color: 'var(--miami-pink)', 
-                textDecoration: 'none',
-                fontWeight: 600,
-                transition: 'color 0.25s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--miami-pink-light)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--miami-pink)'}
+              className="partner-link"
             >
               Classics Nutrition
             </a>
