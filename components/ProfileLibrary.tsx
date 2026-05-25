@@ -1,0 +1,513 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Search, Dumbbell, BookOpen, Clock, Play, X, Info } from 'lucide-react';
+
+interface Exercise {
+  id: string;
+  name: string;
+  gif_url?: string;
+  muscle_group?: string;
+  instructions?: string;
+  created_at: string;
+}
+
+interface ProgramReservation {
+  id: string;
+  content_id: string;
+  status: string;
+  programs?: {
+    title: string;
+    slug: string;
+  };
+}
+
+interface ProfileLibraryProps {
+  grantedPrograms: ProgramReservation[];
+  allExercises: Exercise[];
+}
+
+export default function ProfileLibrary({ grantedPrograms, allExercises }: ProfileLibraryProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMuscle, setSelectedMuscle] = useState('Tous');
+  const [activeExercise, setActiveExercise] = useState<Exercise | null>(null);
+
+  // Get unique muscle groups from exercises (excluding empty)
+  const muscleGroups = ['Tous', ...Array.from(new Set(allExercises.map(ex => ex.muscle_group).filter(Boolean))) as string[]];
+
+  // Filters
+  const matchesSearch = (text: string) => text.toLowerCase().includes(searchTerm.toLowerCase());
+
+  const filteredPrograms = grantedPrograms.filter(p => 
+    p.programs?.title && matchesSearch(p.programs.title)
+  );
+
+  const filteredExercises = allExercises.filter(ex => {
+    const matchesQuery = matchesSearch(ex.name) || (ex.muscle_group && matchesSearch(ex.muscle_group));
+    const matchesMuscle = selectedMuscle === 'Tous' || ex.muscle_group === selectedMuscle;
+    return matchesQuery && matchesMuscle;
+  });
+
+  const hasSearch = searchTerm.trim().length > 0;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32, width: '100%' }}>
+      
+      {/* Interactive Search Bar */}
+      <div 
+        className="card-glass" 
+        style={{ 
+          padding: 24, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 16,
+          border: '1px solid rgba(0, 245, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(7, 6, 26, 0.5), 0 0 15px rgba(0, 245, 255, 0.05)'
+        }}
+      >
+        <div style={{ position: 'relative', width: '100%' }}>
+          <Search 
+            size={20} 
+            style={{ 
+              position: 'absolute', 
+              left: 16, 
+              top: '50%', 
+              transform: 'translateY(-50%)', 
+              color: 'var(--miami-cyan)' 
+            }} 
+          />
+          <input 
+            className="input-miami" 
+            placeholder="Rechercher un programme ou un exercice (ex: Développé couché, Pectoraux...)" 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{ 
+              paddingLeft: 48, 
+              width: '100%', 
+              height: 52, 
+              fontSize: '1rem',
+              borderRadius: 14,
+              borderColor: searchTerm ? 'var(--miami-cyan)' : 'rgba(255, 10, 94, 0.2)'
+            }}
+          />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm('')}
+              style={{
+                position: 'absolute',
+                right: 16,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: 'rgba(226, 232, 240, 0.5)',
+                cursor: 'pointer',
+                padding: 4
+              }}
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+        
+        {hasSearch && (
+          <div style={{ fontSize: '0.85rem', color: 'rgba(245, 240, 255, 0.6)' }}>
+            Résultats de recherche pour &quot;<span style={{ color: 'var(--miami-cyan)' }}>{searchTerm}</span>&quot; : 
+            {` ${filteredPrograms.length} programme(s) et ${filteredExercises.length} exercice(s) trouvé(s).`}
+          </div>
+        )}
+      </div>
+
+      {/* Main Library Display */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 32, alignItems: 'start' }}>
+        
+        {/* Left Column: Programs (or Search Results - Programs) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className="card-glass" style={{ padding: '32px 24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+              <div style={{ 
+                width: 40, 
+                height: 40, 
+                borderRadius: 10, 
+                background: 'rgba(0, 245, 255, 0.1)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                color: 'var(--miami-cyan)',
+                boxShadow: '0 0 10px rgba(0, 245, 255, 0.2)'
+              }}>
+                <Dumbbell size={20} />
+              </div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>
+                {hasSearch ? 'Programmes trouvés' : 'Mes Programmes'}
+              </h2>
+            </div>
+
+            {filteredPrograms.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: 'rgba(245, 240, 255, 0.4)' }}>
+                <Dumbbell size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
+                <p style={{ fontSize: '0.9rem' }}>
+                  {hasSearch ? 'Aucun programme correspondant' : 'Aucun programme disponible dans votre espace'}
+                </p>
+                {!hasSearch && (
+                  <Link href="/programs" className="btn-ghost" style={{ marginTop: 16, fontSize: '0.8rem', justifyContent: 'center' }}>
+                    Découvrir les programmes
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {filteredPrograms.map(r => (
+                  <Link 
+                    key={r.id} 
+                    href={`/programs/${r.programs?.slug || r.content_id}`} 
+                    className="hover-lift"
+                    style={{
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      padding: '16px 20px',
+                      background: 'rgba(0, 245, 255, 0.05)',
+                      border: '1px solid rgba(0, 245, 255, 0.15)',
+                      borderRadius: 12, 
+                      textDecoration: 'none',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                      {r.programs?.title || `Programme #${r.content_id.slice(-6)}`}
+                    </span>
+                    <span className="badge badge-cyan" style={{ letterSpacing: '0.05em' }}>Accéder</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right/Double Column: Exercises Library */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, gridColumn: 'span 1' }} className="hide-tablet:grid-col-span-1">
+          <div className="card-glass" style={{ padding: '32px 24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ 
+                  width: 40, 
+                  height: 40, 
+                  borderRadius: 10, 
+                  background: 'rgba(255, 10, 94, 0.12)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: 'var(--miami-pink)',
+                  boxShadow: '0 0 10px rgba(255, 10, 94, 0.2)'
+                }}>
+                  <Play size={20} />
+                </div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>
+                  Bibliothèque d&apos;Exercices
+                </h2>
+              </div>
+              <div className="badge badge-pink" style={{ letterSpacing: '0.05em' }}>
+                {allExercises.length} Mouvements
+              </div>
+            </div>
+
+            {/* Muscle Group Tab Filters */}
+            {!hasSearch && (
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  gap: 8, 
+                  overflowX: 'auto', 
+                  paddingBottom: 12, 
+                  marginBottom: 20,
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+                }}
+                className="scrollbar-hide"
+              >
+                {muscleGroups.map(group => (
+                  <button
+                    key={group}
+                    onClick={() => setSelectedMuscle(group)}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 20,
+                      background: selectedMuscle === group ? 'var(--miami-pink)' : 'rgba(255, 255, 255, 0.04)',
+                      border: `1px solid ${selectedMuscle === group ? 'var(--miami-pink)' : 'rgba(255, 255, 255, 0.08)'}`,
+                      color: selectedMuscle === group ? 'white' : 'rgba(245, 240, 255, 0.7)',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.25s ease'
+                    }}
+                  >
+                    {group}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {filteredExercises.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: 'rgba(245, 240, 255, 0.4)' }}>
+                <Info size={36} style={{ marginBottom: 12, opacity: 0.3, color: 'var(--miami-pink)' }} />
+                <p style={{ fontSize: '0.9rem' }}>Aucun exercice trouvé</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+                {filteredExercises.map(ex => (
+                  <div
+                    key={ex.id}
+                    onClick={() => setActiveExercise(ex)}
+                    className="hover-lift"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      borderRadius: 12,
+                      padding: 14,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12,
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = 'rgba(255, 10, 94, 0.25)';
+                      e.currentTarget.style.background = 'rgba(255, 10, 94, 0.02)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }}
+                  >
+                    <div style={{ 
+                      width: '100%', 
+                      height: 100, 
+                      borderRadius: 8, 
+                      background: 'rgba(7, 6, 26, 0.4)', 
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative'
+                    }}>
+                      {ex.gif_url ? (
+                        <img 
+                          src={ex.gif_url} 
+                          alt={ex.name} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
+                      ) : (
+                        <Dumbbell size={24} style={{ color: 'rgba(245, 240, 255, 0.2)' }} />
+                      )}
+                      
+                      {/* Play overlay button on hover */}
+                      <div style={{
+                        position: 'absolute', inset: 0, 
+                        background: 'rgba(7, 6, 26, 0.4)', 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        opacity: 0, transition: 'opacity 0.2s'
+                      }}
+                      className="play-overlay"
+                      onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '0'}
+                      >
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--miami-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 0 10px var(--miami-pink)' }}>
+                          <Play size={14} style={{ fill: 'currentColor', marginLeft: 2 }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 style={{ 
+                        color: 'white', 
+                        fontSize: '0.9rem', 
+                        fontWeight: 700, 
+                        marginBottom: 6,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        minHeight: '2.6em',
+                        lineHeight: 1.3
+                      }}>
+                        {ex.name}
+                      </h4>
+                      {ex.muscle_group && (
+                        <span 
+                          className="badge" 
+                          style={{ 
+                            fontSize: '0.65rem', 
+                            background: 'rgba(189, 0, 255, 0.1)', 
+                            color: 'var(--miami-purple-light)', 
+                            border: '1px solid rgba(189, 0, 255, 0.2)' 
+                          }}
+                        >
+                          {ex.muscle_group}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* Exercise Details Modal */}
+      {activeExercise && (
+        <div 
+          style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: 'rgba(4, 3, 16, 0.85)', 
+            backdropFilter: 'blur(16px)', 
+            zIndex: 1100, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: 20 
+          }}
+          onClick={() => setActiveExercise(null)}
+        >
+          <div 
+            className="card-glass" 
+            style={{ 
+              width: '100%', 
+              maxWidth: 550, 
+              padding: 32, 
+              position: 'relative',
+              border: '1px solid rgba(255, 10, 94, 0.3)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 10, 94, 0.15)',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setActiveExercise(null)} 
+              style={{ 
+                position: 'absolute', 
+                top: 20, 
+                right: 20, 
+                background: 'rgba(255,255,255,0.03)', 
+                border: '1px solid rgba(255,255,255,0.08)', 
+                color: 'white', 
+                cursor: 'pointer',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,10,94,0.1)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+            >
+              <X size={20} />
+            </button>
+
+            {/* Modal Content */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 10 }}>
+              
+              <div>
+                {activeExercise.muscle_group && (
+                  <span 
+                    className="badge" 
+                    style={{ 
+                      marginBottom: 10, 
+                      background: 'rgba(189, 0, 255, 0.15)', 
+                      color: 'var(--miami-purple-light)', 
+                      border: '1px solid rgba(189, 0, 255, 0.3)',
+                      letterSpacing: '0.05em'
+                    }}
+                  >
+                    {activeExercise.muscle_group}
+                  </span>
+                )}
+                <h3 style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: '2.5rem', 
+                  fontWeight: 'normal', 
+                  color: 'white', 
+                  lineHeight: 1, 
+                  letterSpacing: '0.04em',
+                  margin: 0,
+                  paddingRight: 40
+                }}>
+                  {activeExercise.name}
+                </h3>
+              </div>
+
+              {/* Demo Animation Container */}
+              <div style={{ 
+                width: '100%', 
+                height: 280, 
+                borderRadius: 16, 
+                background: 'rgba(7, 6, 26, 0.6)', 
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.6)'
+              }}>
+                {activeExercise.gif_url ? (
+                  <img 
+                    src={activeExercise.gif_url} 
+                    alt={activeExercise.name} 
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', color: 'rgba(245, 240, 255, 0.3)' }}>
+                    <Dumbbell size={48} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                    <p style={{ fontSize: '0.9rem' }}>Pas d&apos;animation disponible</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Instructions */}
+              <div>
+                <h4 style={{ 
+                  color: 'white', 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: '1.4rem', 
+                  fontWeight: 'normal', 
+                  letterSpacing: '0.04em',
+                  marginBottom: 10,
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                  paddingBottom: 6
+                }}>
+                  Instructions de mouvement
+                </h4>
+                {activeExercise.instructions ? (
+                  <p style={{ 
+                    fontSize: '0.95rem', 
+                    color: 'rgba(245, 240, 255, 0.75)', 
+                    lineHeight: 1.6, 
+                    whiteSpace: 'pre-line',
+                    margin: 0
+                  }}>
+                    {activeExercise.instructions}
+                  </p>
+                ) : (
+                  <p style={{ fontSize: '0.95rem', color: 'rgba(245, 240, 255, 0.4)', fontStyle: 'italic', margin: 0 }}>
+                    Aucune instruction disponible pour cet exercice.
+                  </p>
+                )}
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
