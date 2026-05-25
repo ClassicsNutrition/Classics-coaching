@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
@@ -7,22 +7,22 @@
 
 :root {
   /* Miami Vice Palette */
-  --miami-pink: #FF2D78;
-  --miami-pink-light: #FF6BA3;
-  --miami-pink-dark: #CC1155;
+  --miami-pink: #FF0A5E;
+  --miami-pink-light: #FF5A92;
+  --miami-pink-dark: #C20042;
   --miami-cyan: #00F5FF;
   --miami-cyan-light: #66F9FF;
   --miami-cyan-dark: #00C4CC;
-  --miami-purple: #7B2FBE;
-  --miami-purple-light: #A855F7;
-  --miami-night: #06060F;
-  --miami-dusk: #0D0D1A;
-  --miami-card: #111128;
-  --miami-border: rgba(255, 45, 120, 0.15);
+  --miami-purple: #BD00FF;
+  --miami-purple-light: #D946EF;
+  --miami-night: #07061A;
+  --miami-dusk: #0F0E2A;
+  --miami-card: #14133A;
+  --miami-border: rgba(255, 10, 94, 0.25);
 
   /* Typography */
-  --font-display: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
 }
 
 * {
