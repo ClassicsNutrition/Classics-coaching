@@ -16,31 +16,42 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
 
   return (
     <>
+      {/* Sunset Top Bar */}
+      <div style={{
+        height: '3px',
+        background: 'linear-gradient(90deg, var(--miami-pink), var(--miami-purple), var(--miami-cyan))',
+        width: '100%',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 101
+      }} />
+
       <nav style={{ 
-        borderBottom: '1px solid rgba(255,45,120,0.1)', 
+        borderBottom: '1px solid var(--miami-border)', 
         padding: '0 24px', 
         height: 70, 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between', 
-        background: 'rgba(6,6,15,0.9)', 
+        background: 'rgba(7, 6, 26, 0.95)', 
         backdropFilter: 'blur(20px)', 
         position: 'sticky', 
-        top: 0, 
+        top: 3, 
         zIndex: 100 
       }}>
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logo.png" alt="Classics Coaching" style={{ height: 45, width: 'auto' }} />
+          <img src="/logo.png" alt="Classics Coaching" style={{ height: 45, width: 'auto', filter: 'drop-shadow(0 0 8px rgba(0, 245, 255, 0.2))' }} />
         </Link>
 
         {/* Desktop Links */}
         <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Link href="/ebooks" className="btn-ghost" style={{ fontSize: '0.85rem' }}>E-books</Link>
-          <Link href="/programs" className="btn-ghost" style={{ fontSize: '0.85rem' }}>Programmes</Link>
+          <Link href="/ebooks" className="btn-ghost" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>E-books</Link>
+          <Link href="/programs" className="btn-ghost" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Programmes</Link>
           
           {isAdmin && (
-            <Link href="/admin" className="btn-ghost" style={{ fontSize: '0.85rem', color: 'var(--miami-cyan)' }}>
+            <Link href="/admin" className="btn-ghost" style={{ fontSize: '0.85rem', color: 'var(--miami-cyan)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               <ShieldCheck size={16} /> Admin
             </Link>
           )}
@@ -49,7 +60,7 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
           
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Link href="/profile" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px' }}>
+              <Link href="/profile" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <User size={16} /> Mon Espace
               </Link>
               <form action="/auth/signout" method="post">
@@ -59,7 +70,7 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
               </form>
             </div>
           ) : (
-            <Link href="/login" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px' }}>
+            <Link href="/login" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Connexion
             </Link>
           )}
