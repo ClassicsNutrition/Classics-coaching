@@ -8,6 +8,62 @@ import {
   Settings, TrendingUp, Search, ArrowLeft, Save, X
 } from 'lucide-react';
 
+const MUSCLE_GROUPS = [
+  {
+    name: 'Pectoraux',
+    portions: [
+      'Pectoraux - Portion supérieure',
+      'Pectoraux - Portion moyenne',
+      'Pectoraux - Portion inférieure'
+    ]
+  },
+  {
+    name: 'Épaules',
+    portions: [
+      'Épaules - Faisceau antérieur',
+      'Épaules - Faisceau latéral',
+      'Épaules - Faisceau postérieur'
+    ]
+  },
+  {
+    name: 'Bras',
+    portions: [
+      'Biceps - Portion longue',
+      'Biceps - Portion courte',
+      'Triceps - Chef long',
+      'Triceps - Chef latéral',
+      'Triceps - Chef médial',
+      'Avant-bras'
+    ]
+  },
+  {
+    name: 'Dos',
+    portions: [
+      'Dos - Grand dorsal',
+      'Dos - Trapèzes',
+      'Dos - Lombaires',
+      'Dos - Grand rond & coiffe'
+    ]
+  },
+  {
+    name: 'Jambes',
+    portions: [
+      'Jambes - Quadriceps',
+      'Jambes - Ischio-jambiers',
+      'Jambes - Fessiers',
+      'Jambes - Mollets'
+    ]
+  },
+  {
+    name: 'Abdominaux',
+    portions: [
+      'Abdominaux - Grand droit',
+      'Abdominaux - Obliques',
+      'Abdominaux - Transverse'
+    ]
+  }
+];
+
 export default function AdminExercisesPage() {
   const supabase = createClient();
 
@@ -22,9 +78,30 @@ export default function AdminExercisesPage() {
   const [searchingGiphy, setSearchingGiphy] = useState(false);
   const [showGiphyOverlay, setShowGiphyOverlay] = useState(false);
 
+  const [selectedPortions, setSelectedPortions] = useState<string[]>([]);
+
   useEffect(() => {
     loadExercises();
   }, []);
+
+  useEffect(() => {
+    if (editingEx) {
+      if (editingEx.muscle_group) {
+        const parts = editingEx.muscle_group.split(',').map((s: string) => s.trim()).filter(Boolean);
+        setSelectedPortions(parts);
+      } else {
+        setSelectedPortions([]);
+      }
+    }
+  }, [editingEx]);
+
+  const handlePortionToggle = (portion: string) => {
+    setSelectedPortions(prev => 
+      prev.includes(portion) 
+        ? prev.filter(p => p !== portion) 
+        : [...prev, portion]
+    );
+  };
 
   async function loadExercises() {
     const { data } = await supabase.from('exercises').select('*').order('name', { ascending: true });
@@ -43,7 +120,7 @@ export default function AdminExercisesPage() {
     const formData = new FormData(e.currentTarget);
     const payload = {
       name: formData.get('name') as string,
-      muscle_group: formData.get('muscle_group') as string,
+      muscle_group: selectedPortions.join(', '),
       gif_url: formData.get('gif_url') as string,
       instructions: formData.get('instructions') as string,
     };
@@ -135,7 +212,17 @@ export default function AdminExercisesPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <h3 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, marginBottom: 4 }}>{ex.name}</h3>
-                  <div className="badge badge-purple" style={{ fontSize: '0.65rem' }}>{ex.muscle_group || 'Global'}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                    {ex.muscle_group ? (
+                      ex.muscle_group.split(',').map((m: string) => (
+                        <div key={m.trim()} className="badge badge-purple" style={{ fontSize: '0.65rem' }}>
+                          {m.trim()}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="badge badge-purple" style={{ fontSize: '0.65rem' }}>Global</div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
@@ -167,8 +254,44 @@ export default function AdminExercisesPage() {
                 <input name="name" required className="input-miami" defaultValue={editingEx.name} placeholder="Ex: Développé couché" />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', marginBottom: 6 }}>Muscle ciblé</label>
-                <input name="muscle_group" className="input-miami" defaultValue={editingEx.muscle_group} placeholder="Ex: Pectoraux" />
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', marginBottom: 6 }}>
+                  Muscles et Portions Ciblés (Sélectionnez un ou plusieurs)
+                </label>
+                <div style={{ 
+                  maxHeight: '200px', 
+                  overflowY: 'auto', 
+                  border: '1px solid rgba(255, 255, 255, 0.1)', 
+                  borderRadius: '8px', 
+                  padding: '12px',
+                  background: 'rgba(0,0,0,0.25)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }} className="scrollbar-hide">
+                  {MUSCLE_GROUPS.map(group => (
+                    <div key={group.name} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ color: 'var(--miami-cyan)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {group.name}
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                        {group.portions.map(portion => {
+                          const isChecked = selectedPortions.includes(portion);
+                          return (
+                            <label key={portion} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: 'rgba(226, 232, 240, 0.8)', cursor: 'pointer' }}>
+                              <input 
+                                type="checkbox" 
+                                checked={isChecked}
+                                onChange={() => handlePortionToggle(portion)}
+                                style={{ accentColor: 'var(--miami-pink)' }}
+                              />
+                              {portion.includes(' - ') ? portion.split(' - ')[1] : portion}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', marginBottom: 6 }}>URL du GIF de démonstration</label>

@@ -26,13 +26,28 @@ interface HomeLibraryProps {
   exercises: Exercise[];
 }
 
+const MAIN_CATEGORIES = ['Tous', 'Pectoraux', 'Dos', 'Épaules', 'Bras', 'Jambes', 'Abdominaux'];
+
+function isExerciseMatchingMuscle(exercise: Exercise, selectedMuscle: string): boolean {
+  if (selectedMuscle === 'Tous') return true;
+  if (!exercise.muscle_group) return false;
+  
+  const portions = exercise.muscle_group.split(',').map(s => s.trim().toLowerCase());
+  const search = selectedMuscle.toLowerCase();
+  
+  if (search === 'bras') {
+    return portions.some(p => 
+      p.includes('bras') || p.includes('biceps') || p.includes('triceps')
+    );
+  }
+  
+  return portions.some(p => p.includes(search));
+}
+
 export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState('Tous');
   const [activeExercise, setActiveExercise] = useState<Exercise | null>(null);
-
-  // Get unique muscle groups from exercises (excluding empty)
-  const muscleGroups = ['Tous', ...Array.from(new Set(exercises.map(ex => ex.muscle_group).filter(Boolean))) as string[]];
 
   // Filters
   const matchesSearch = (text: string) => text.toLowerCase().includes(searchTerm.toLowerCase());
@@ -43,7 +58,7 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
 
   const filteredExercises = exercises.filter(ex => {
     const matchesQuery = matchesSearch(ex.name) || (ex.muscle_group && matchesSearch(ex.muscle_group));
-    const matchesMuscle = selectedMuscle === 'Tous' || ex.muscle_group === selectedMuscle;
+    const matchesMuscle = isExerciseMatchingMuscle(ex, selectedMuscle);
     return matchesQuery && matchesMuscle;
   });
 
@@ -228,7 +243,7 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
                 }}
                 className="scrollbar-hide"
               >
-                {muscleGroups.map(group => (
+                {MAIN_CATEGORIES.map(group => (
                   <button
                     key={group}
                     onClick={() => setSelectedMuscle(group)}
@@ -338,17 +353,22 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
                         {ex.name}
                       </h4>
                       {ex.muscle_group && (
-                        <span 
-                          className="badge" 
-                          style={{ 
-                            fontSize: '0.65rem', 
-                            background: 'rgba(189, 0, 255, 0.1)', 
-                            color: 'var(--miami-purple-light)', 
-                            border: '1px solid rgba(189, 0, 255, 0.2)' 
-                          }}
-                        >
-                          {ex.muscle_group}
-                        </span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {ex.muscle_group.split(',').map((m: string) => (
+                            <span 
+                              key={m.trim()}
+                              className="badge" 
+                              style={{ 
+                                fontSize: '0.65rem', 
+                                background: 'rgba(189, 0, 255, 0.1)', 
+                                color: 'var(--miami-purple-light)', 
+                                border: '1px solid rgba(189, 0, 255, 0.2)' 
+                              }}
+                            >
+                              {m.trim()}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -420,18 +440,23 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
               
               <div>
                 {activeExercise.muscle_group && (
-                  <span 
-                    className="badge" 
-                    style={{ 
-                      marginBottom: 10, 
-                      background: 'rgba(189, 0, 255, 0.15)', 
-                      color: 'var(--miami-purple-light)', 
-                      border: '1px solid rgba(189, 0, 255, 0.3)',
-                      letterSpacing: '0.05em'
-                    }}
-                  >
-                    {activeExercise.muscle_group}
-                  </span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: 12 }}>
+                    {activeExercise.muscle_group.split(',').map((m: string) => (
+                      <span 
+                        key={m.trim()}
+                        className="badge" 
+                        style={{ 
+                          background: 'rgba(189, 0, 255, 0.15)', 
+                          color: 'var(--miami-purple-light)', 
+                          border: '1px solid rgba(189, 0, 255, 0.3)',
+                          letterSpacing: '0.05em',
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        {m.trim()}
+                      </span>
+                    ))}
+                  </div>
                 )}
                 <h3 style={{ 
                   fontFamily: 'var(--font-display)', 
