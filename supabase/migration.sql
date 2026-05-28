@@ -110,45 +110,46 @@ DROP TRIGGER IF EXISTS reservations_updated_at ON reservations;
 CREATE TRIGGER reservations_updated_at BEFORE UPDATE ON reservations FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 -- ============================================================
--- 6. ROW LEVEL SECURITY
+-- 6. ROW LEVEL SECURITY & HELPER FUNCTIONS
 -- ============================================================
+
+-- Create function to check if the current user is admin without recursion
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Profiles
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
+CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING (public.is_admin());
 
 -- Ebooks: public read if published
 ALTER TABLE ebooks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Published ebooks are public" ON ebooks FOR SELECT USING (published = true);
-CREATE POLICY "Admins can do everything on ebooks" ON ebooks FOR ALL USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
+CREATE POLICY "Admins can do everything on ebooks" ON ebooks FOR ALL USING (public.is_admin());
 
 -- Programs: public read if published
 ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Published programs are public" ON programs FOR SELECT USING (published = true);
-CREATE POLICY "Admins can do everything on programs" ON programs FOR ALL USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
+CREATE POLICY "Admins can do everything on programs" ON programs FOR ALL USING (public.is_admin());
 
 -- Exercises: public read
 ALTER TABLE exercises ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Exercises are public" ON exercises FOR SELECT USING (true);
-CREATE POLICY "Admins manage exercises" ON exercises FOR ALL USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
+CREATE POLICY "Admins manage exercises" ON exercises FOR ALL USING (public.is_admin());
 
 -- Reservations
 ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users see own reservations" ON reservations FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can create reservations" ON reservations FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Admins manage all reservations" ON reservations FOR ALL USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
+CREATE POLICY "Admins manage all reservations" ON reservations FOR ALL USING (public.is_admin());
 
 -- ============================================================
 -- 7. MAKE YOURSELF ADMIN (replace with your email)
