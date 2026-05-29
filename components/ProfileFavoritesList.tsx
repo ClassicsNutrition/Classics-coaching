@@ -5,6 +5,17 @@ import { Heart, Dumbbell, X, Play } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
+function getMainMuscles(muscleGroupStr?: string): string[] {
+  if (!muscleGroupStr) return [];
+  const parts = muscleGroupStr.split(',').map(m => m.trim());
+  const simplified = parts.map(p => {
+    const beforeDash = p.split(' - ')[0];
+    const beforeParen = beforeDash.split('(')[0];
+    return beforeParen.trim();
+  });
+  return Array.from(new Set(simplified)).slice(0, 2);
+}
+
 interface Exercise {
   id: string;
   name: string;
@@ -152,9 +163,9 @@ export default function ProfileFavoritesList({ initialExercises, userId }: Profi
               </h4>
               {ex.muscle_group && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                  {ex.muscle_group.split(',').map((m: string) => (
-                    <span key={m.trim()} className="badge" style={{ fontSize: '0.65rem', background: 'rgba(189, 0, 255, 0.1)', color: 'var(--miami-purple-light)', border: '1px solid rgba(189, 0, 255, 0.2)' }}>
-                      {m.trim()}
+                  {getMainMuscles(ex.muscle_group).map((m: string) => (
+                    <span key={m} className="badge" style={{ fontSize: '0.65rem', background: 'rgba(189, 0, 255, 0.1)', color: 'var(--miami-purple-light)', border: '1px solid rgba(189, 0, 255, 0.2)' }}>
+                      {m}
                     </span>
                   ))}
                 </div>

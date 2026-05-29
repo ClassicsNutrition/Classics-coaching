@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { BookOpen, Dumbbell, Star, ArrowRight, Zap, Heart, ShoppingBag, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import HomeLibrary from '@/components/HomeLibrary';
+import { Suspense } from 'react';
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -292,12 +293,14 @@ export default async function HomePage() {
               Rechercher un Exercice ou Programme
             </h2>
           </div>
-          <HomeLibrary 
-            programs={programs} 
-            exercises={exercises} 
-            user={user} 
-            initialFavorites={favoriteIds} 
-          />
+          <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(245, 240, 255, 0.4)', fontSize: '0.95rem' }}>Chargement de la bibliothèque d&#39;exercices...</div>}>
+            <HomeLibrary 
+              programs={programs} 
+              exercises={exercises} 
+              user={user} 
+              initialFavorites={favoriteIds} 
+            />
+          </Suspense>
         </div>
       </section>
 

@@ -1,9 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Dumbbell, Play, X, Info, ArrowRight, Heart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useSearchParams } from 'next/navigation';
+
+function getMainMuscles(muscleGroupStr?: string): string[] {
+  if (!muscleGroupStr) return [];
+  const parts = muscleGroupStr.split(',').map(m => m.trim());
+  const simplified = parts.map(p => {
+    const beforeDash = p.split(' - ')[0];
+    const beforeParen = beforeDash.split('(')[0];
+    return beforeParen.trim();
+  });
+  return Array.from(new Set(simplified)).slice(0, 2);
+}
 
 interface Exercise {
   id: string;
@@ -50,10 +62,33 @@ function isExerciseMatchingMuscle(exercise: Exercise, selectedMuscle: string, fa
 
 export default function HomeLibrary({ programs, exercises, user, initialFavorites = [] }: HomeLibraryProps) {
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState('Tous');
   const [activeExercise, setActiveExercise] = useState<Exercise | null>(null);
   const [favorites, setFavorites] = useState<string[]>(initialFavorites);
+  const [visibleCount, setVisibleCount] = useState(8);
+
+  // Sync search parameters from URL (e.g. ?muscle=Pectoraux)
+  useEffect(() => {
+    const muscleParam = searchParams.get('muscle');
+    if (muscleParam) {
+      const capitalized = muscleParam.charAt(0).toUpperCase() + muscleParam.slice(1).toLowerCase();
+      let normalized = capitalized;
+      if (normalized.startsWith('Pec')) normalized = 'Pectoraux';
+      if (normalized.startsWith('Abdo')) normalized = 'Abdominaux';
+
+      if (MAIN_CATEGORIES.includes(normalized)) {
+        setSelectedMuscle(normalized);
+      }
+    }
+  }, [searchParams]);
+
+  // Reset visible exercise count on filter change
+  useEffect(() => {
+    setVisibleCount(8);
+  }, [selectedMuscle, searchTerm]);
 
   // Filters
   const matchesSearch = (text: string) => text.toLowerCase().includes(searchTerm.toLowerCase());
@@ -309,149 +344,186 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
                 <p style={{ fontSize: '0.9rem' }}>Aucun exercice trouvé</p>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16 }}>
-                {filteredExercises.map(ex => (
-                  <div
-                    key={ex.id}
-                    onClick={() => setActiveExercise(ex)}
-                    className="hover-lift"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
-                      borderRadius: 12,
-                      padding: 14,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 12,
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.borderColor = 'rgba(255, 10, 94, 0.25)';
-                      e.currentTarget.style.background = 'rgba(255, 10, 94, 0.02)';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                    }}
-                  >
-                    <div style={{ 
-                      width: '100%', 
-                      height: 100, 
-                      borderRadius: 8, 
-                      background: 'rgba(7, 6, 26, 0.4)', 
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative'
-                    }}>
-                      {ex.gif_url ? (
-                        <img 
-                          src={ex.gif_url} 
-                          alt={ex.name} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
-                      ) : (
-                        <Dumbbell size={24} style={{ color: 'rgba(245, 240, 255, 0.2)' }} />
-                      )}
-                      
-                      {/* Favorite Heart Button */}
-                      <button
-                        onClick={(e) => toggleFavorite(ex.id, e)}
-                        style={{
-                          position: 'absolute',
-                          top: 8,
-                          right: 8,
-                          zIndex: 10,
-                          background: 'rgba(7, 6, 26, 0.65)',
-                          backdropFilter: 'blur(4px)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          borderRadius: '50%',
-                          width: 28,
-                          height: 28,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: favorites.includes(ex.id) ? 'var(--miami-pink)' : 'rgba(245, 240, 255, 0.7)',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          boxShadow: favorites.includes(ex.id) ? '0 0 8px rgba(255, 10, 94, 0.3)' : 'none'
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.transform = 'scale(1.1)';
-                          e.currentTarget.style.color = 'var(--miami-pink)';
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.transform = 'scale(1)';
-                          e.currentTarget.style.color = favorites.includes(ex.id) ? 'var(--miami-pink)' : 'rgba(245, 240, 255, 0.7)';
-                        }}
-                      >
-                        <Heart 
-                          size={14} 
-                          style={{ 
-                            fill: favorites.includes(ex.id) ? 'var(--miami-pink)' : 'none',
-                            transition: 'fill 0.2s ease'
-                          }} 
-                        />
-                      </button>
-
-                      {/* Play overlay on hover */}
-                      <div style={{
-                        position: 'absolute', inset: 0, 
-                        background: 'rgba(7, 6, 26, 0.4)', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        opacity: 0, transition: 'opacity 0.2s',
-                        zIndex: 5
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16 }}>
+                  {filteredExercises.slice(0, visibleCount).map(ex => (
+                    <div
+                      key={ex.id}
+                      onClick={() => setActiveExercise(ex)}
+                      className="hover-lift"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 14,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                        transition: 'all 0.3s ease'
                       }}
-                      className="play-overlay"
-                      onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                      onMouseLeave={e => e.currentTarget.style.opacity = '0'}
-                      >
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--miami-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 0 10px var(--miami-pink)' }}>
-                          <Play size={14} style={{ fill: 'currentColor', marginLeft: 2 }} />
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 10, 94, 0.25)';
+                        e.currentTarget.style.background = 'rgba(255, 10, 94, 0.02)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                      }}
+                    >
+                      <div style={{ 
+                        width: '100%', 
+                        height: 100, 
+                        borderRadius: 8, 
+                        background: 'rgba(7, 6, 26, 0.4)', 
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                      }}>
+                        {ex.gif_url ? (
+                          <img 
+                            src={ex.gif_url} 
+                            alt={ex.name} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                          />
+                        ) : (
+                          <Dumbbell size={24} style={{ color: 'rgba(245, 240, 255, 0.2)' }} />
+                        )}
+                        
+                        {/* Favorite Heart Button */}
+                        <button
+                          onClick={(e) => toggleFavorite(ex.id, e)}
+                          style={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            zIndex: 10,
+                            background: 'rgba(7, 6, 26, 0.65)',
+                            backdropFilter: 'blur(4px)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '50%',
+                            width: 28,
+                            height: 28,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: favorites.includes(ex.id) ? 'var(--miami-pink)' : 'rgba(245, 240, 255, 0.7)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: favorites.includes(ex.id) ? '0 0 8px rgba(255, 10, 94, 0.3)' : 'none'
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                            e.currentTarget.style.color = 'var(--miami-pink)';
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.color = favorites.includes(ex.id) ? 'var(--miami-pink)' : 'rgba(245, 240, 255, 0.7)';
+                          }}
+                        >
+                          <Heart 
+                            size={14} 
+                            style={{ 
+                              fill: favorites.includes(ex.id) ? 'var(--miami-pink)' : 'none',
+                              transition: 'fill 0.2s ease'
+                            }} 
+                          />
+                        </button>
+
+                        {/* Play overlay on hover */}
+                        <div style={{
+                          position: 'absolute', inset: 0, 
+                          background: 'rgba(7, 6, 26, 0.4)', 
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          opacity: 0, transition: 'opacity 0.2s',
+                          zIndex: 5
+                        }}
+                        className="play-overlay"
+                        onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '0'}
+                        >
+                          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--miami-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 0 10px var(--miami-pink)' }}>
+                            <Play size={14} style={{ fill: 'currentColor', marginLeft: 2 }} />
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <h4 style={{ 
-                        color: 'white', 
-                        fontSize: '0.9rem', 
-                        fontWeight: 700, 
-                        marginBottom: 6,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        minHeight: '2.6em',
-                        lineHeight: 1.3
-                      }}>
-                        {ex.name}
-                      </h4>
-                      {ex.muscle_group && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                          {ex.muscle_group.split(',').map((m: string) => (
-                            <span 
-                              key={m.trim()}
-                              className="badge" 
-                              style={{ 
-                                fontSize: '0.65rem', 
-                                background: 'rgba(189, 0, 255, 0.1)', 
-                                color: 'var(--miami-purple-light)', 
-                                border: '1px solid rgba(189, 0, 255, 0.2)' 
-                              }}
-                            >
-                              {m.trim()}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      <div>
+                        <h4 style={{ 
+                          color: 'white', 
+                          fontSize: '0.9rem', 
+                          fontWeight: 700, 
+                          marginBottom: 6,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          minHeight: '2.6em',
+                          lineHeight: 1.3
+                        }}>
+                          {ex.name}
+                        </h4>
+                        {ex.muscle_group && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {getMainMuscles(ex.muscle_group).map((m: string) => (
+                              <span 
+                                key={m}
+                                className="badge" 
+                                style={{ 
+                                  fontSize: '0.65rem', 
+                                  background: 'rgba(189, 0, 255, 0.1)', 
+                                  color: 'var(--miami-purple-light)', 
+                                  border: '1px solid rgba(189, 0, 255, 0.2)' 
+                                }}
+                              >
+                                {m}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
+                  ))}
+                </div>
+
+                {/* Load More Button */}
+                {filteredExercises.length > visibleCount && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+                    <button 
+                      onClick={() => setVisibleCount(prev => prev + 8)}
+                      className="btn-ghost"
+                      style={{ 
+                        padding: '12px 28px', 
+                        fontSize: '0.85rem', 
+                        color: 'var(--miami-pink)', 
+                        borderColor: 'rgba(255, 10, 94, 0.35)',
+                        cursor: 'pointer',
+                        borderRadius: '12px',
+                        fontWeight: 600,
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 15px rgba(255, 45, 120, 0.15)'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = 'rgba(255, 10, 94, 0.08)';
+                        e.currentTarget.style.borderColor = 'var(--miami-pink)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.borderColor = 'rgba(255, 10, 94, 0.35)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      Voir plus d&#39;exercices
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>
