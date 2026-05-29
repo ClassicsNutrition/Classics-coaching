@@ -82,6 +82,8 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
       if (MAIN_CATEGORIES.includes(normalized)) {
         setSelectedMuscle(normalized);
       }
+    } else {
+      setSelectedMuscle('Tous');
     }
   }, [searchParams]);
 

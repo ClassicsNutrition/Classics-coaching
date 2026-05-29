@@ -278,7 +278,7 @@ export default async function HomePage() {
       </section>
 
       {/* Search & Library Section */}
-      <section style={{ padding: '100px 24px', background: 'rgba(7, 6, 26, 0.4)', borderTop: '1px solid rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+      <section id="exercises-library" style={{ padding: '100px 24px', background: 'rgba(7, 6, 26, 0.4)', borderTop: '1px solid rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <div style={{ textAlign: 'center', marginBottom: 54 }}>
             <div className="badge badge-cyan" style={{ display: 'inline-flex', marginBottom: 16, letterSpacing: '0.1em' }}>MOUVEMENTS & PLANS</div>
