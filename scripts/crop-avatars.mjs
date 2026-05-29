@@ -26,35 +26,31 @@ async function main() {
   const H = image.bitmap.height;
   console.log(`Image dimensions: ${W}x${H}`);
 
-  // Hardcoded precise coordinates for the 12 avatars (based on 1024x827 image dimensions)
+  // Hardcoded mathematically detected coordinates and diameters for the 12 avatars
   const avatars = [
-    // Row 1 (y = 232)
-    { index: 1, x: 112, y: 232 },
-    { index: 2, x: 308, y: 232 },
-    { index: 3, x: 509, y: 232 },
-    { index: 4, x: 706, y: 232 },
-    { index: 5, x: 902, y: 232 },
-    // Row 2 (y = 482)
-    { index: 6, x: 112, y: 482 },
-    { index: 7, x: 902, y: 482 },
-    // Row 3 (y = 732)
-    { index: 8, x: 112, y: 732 },
-    { index: 9, x: 308, y: 732 },
-    { index: 10, x: 509, y: 732 },
-    { index: 11, x: 706, y: 732 },
-    { index: 12, x: 902, y: 732 }
+    { index: 1, x: 114, y: 217, diameter: 187 },
+    { index: 2, x: 312, y: 217, diameter: 183 },
+    { index: 3, x: 512, y: 217, diameter: 184 },
+    { index: 4, x: 711, y: 217, diameter: 181 },
+    { index: 5, x: 902, y: 217, diameter: 190 },
+    { index: 6, x: 114, y: 481, diameter: 188 },
+    { index: 7, x: 909, y: 482, diameter: 190 },
+    { index: 8, x: 114, y: 695, diameter: 187 },
+    { index: 9, x: 312, y: 698, diameter: 183 },
+    { index: 10, x: 512, y: 694, diameter: 184 },
+    { index: 11, x: 711, y: 694, diameter: 181 },
+    { index: 12, x: 902, y: 698, diameter: 190 }
   ];
 
-  const cropSize = 160;
-
   for (const av of avatars) {
-    const x = Math.max(0, Math.floor(av.x - (cropSize / 2)));
-    const y = Math.max(0, Math.floor(av.y - (cropSize / 2)));
+    const size = av.diameter;
+    const x = Math.max(0, Math.floor(av.x - (size / 2)));
+    const y = Math.max(0, Math.floor(av.y - (size / 2)));
 
-    console.log(`Cropping Avatar ${av.index} at center (${av.x}, ${av.y})...`);
+    console.log(`Cropping Avatar ${av.index} at center (${av.x}, ${av.y}) with size ${size}...`);
     
     // Clone and crop
-    const cropped = image.clone().crop(x, y, cropSize, cropSize);
+    const cropped = image.clone().crop(x, y, size, size);
     
     // Resize to standard 200x200
     cropped.resize(200, 200);
