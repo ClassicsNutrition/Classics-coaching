@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Camera, X, Upload, Check } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { createClient } from '@/lib/supabase/client';
 
 interface ProfileAvatarEditorProps {
@@ -19,8 +20,13 @@ export default function ProfileAvatarEditor({ currentAvatarUrl, userId, displayN
   const [uploading, setUploading] = useState(false);
   const [customFile, setCustomFile] = useState<File | null>(null);
   const [customPreview, setCustomPreview] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -145,7 +151,7 @@ export default function ProfileAvatarEditor({ currentAvatarUrl, userId, displayN
       </div>
 
       {/* Modal */}
-      {isOpen && (
+      {isOpen && mounted && createPortal(
         <div style={{
           position: 'fixed', inset: 0,
           background: 'rgba(4, 3, 16, 0.85)',
@@ -300,7 +306,8 @@ export default function ProfileAvatarEditor({ currentAvatarUrl, userId, displayN
 
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
