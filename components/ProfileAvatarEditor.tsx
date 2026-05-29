@@ -290,7 +290,7 @@ export default function ProfileAvatarEditor({ currentAvatarUrl, userId, displayN
                   onClick={handleSave} 
                   disabled={uploading || (!selectedAvatar && !customFile)}
                   className="btn-primary" 
-                  style={{ flex: 1, fontSize: '0.9rem', padding: '12px 0' }}
+                  style={{ flex: 1, fontSize: '0.9rem', padding: '12px 0', justifyContent: 'center' }}
                 >
                   {uploading ? 'Enregistrement...' : 'Enregistrer'}
                 </button>
@@ -298,7 +298,7 @@ export default function ProfileAvatarEditor({ currentAvatarUrl, userId, displayN
                   onClick={() => setIsOpen(false)}
                   disabled={uploading}
                   className="btn-ghost" 
-                  style={{ flex: 1, fontSize: '0.9rem', padding: '12px 0' }}
+                  style={{ flex: 1, fontSize: '0.9rem', padding: '12px 0', justifyContent: 'center' }}
                 >
                   Annuler
                 </button>
