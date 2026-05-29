@@ -156,3 +156,21 @@ CREATE POLICY "Admins manage all reservations" ON reservations FOR ALL USING (pu
 -- ============================================================
 -- UPDATE profiles SET role = 'admin'
 -- WHERE id = (SELECT id FROM auth.users WHERE email = 'votre@email.com');
+
+-- ============================================================
+-- 8. FAVORITE EXERCISES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS favorite_exercises (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  exercise_id UUID NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, exercise_id)
+);
+
+ALTER TABLE favorite_exercises ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users see own favorites" ON favorite_exercises FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can create favorites" ON favorite_exercises FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own favorites" ON favorite_exercises FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Admins manage all favorites" ON favorite_exercises FOR ALL USING (public.is_admin());
+

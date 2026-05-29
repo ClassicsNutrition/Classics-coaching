@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 export const revalidate = 0;
 import { createClient } from '@/lib/supabase/server';
-import { LogOut, BookOpen, Dumbbell, User, Clock } from 'lucide-react';
+import { LogOut, BookOpen, Dumbbell, User, Clock, Heart } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 export default async function ProfilePage() {
@@ -33,6 +33,22 @@ export default async function ProfilePage() {
   const grantedEbooks = reservations.filter((r: any) => r.content_type === 'ebook' && r.status === 'granted');
   const grantedPrograms = reservations.filter((r: any) => r.content_type === 'program' && r.status === 'granted');
   const pendingCount = reservations.filter((r: any) => r.status === 'pending').length;
+
+  // Fetch user's favorite exercises
+  const { data: dbFavs } = await supabase
+    .from('favorite_exercises')
+    .select(`
+      exercise_id,
+      exercises (
+        id,
+        name,
+        gif_url,
+        muscle_group,
+        instructions
+      )
+    `)
+    .eq('user_id', user.id);
+  const favoriteExercises = dbFavs?.map((f: any) => f.exercises).filter(Boolean) || [];
 
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'Client';
   const joinDate = new Date(user.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -158,6 +174,72 @@ export default async function ProfilePage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Favorite Exercises Section */}
+        <div className="card-glass animate-fadeInUp animate-delay-300" style={{ padding: 'clamp(24px, 4vw, 32px)', marginTop: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255, 10, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-pink)' }}>
+              <Heart size={20} style={{ fill: 'currentColor' }} />
+            </div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: 'white' }}>Mes Exercices Favoris</h2>
+          </div>
+
+          {favoriteExercises.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 16px', color: 'rgba(226,232,240,0.4)' }}>
+              <Heart size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
+              <p style={{ fontSize: '0.875rem' }}>Aucun exercice dans vos favoris pour le moment.</p>
+              <Link href="/" className="btn-ghost" style={{ marginTop: 12, fontSize: '0.8rem', display: 'inline-flex', justifyContent: 'center' }}>
+                Découvrir les exercices
+              </Link>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+              {favoriteExercises.map((ex: any) => (
+                <div key={ex.id} className="hover-lift" style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderRadius: 12,
+                  padding: 14,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12,
+                  transition: 'all 0.3s ease'
+                }}>
+                  <div style={{ 
+                    width: '100%', 
+                    height: 100, 
+                    borderRadius: 8, 
+                    background: 'rgba(7, 6, 26, 0.4)', 
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {ex.gif_url ? (
+                      <img src={ex.gif_url} alt={ex.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <Dumbbell size={24} style={{ color: 'rgba(245, 240, 255, 0.2)' }} />
+                    )}
+                  </div>
+                  <div>
+                    <h4 style={{ color: 'white', fontSize: '0.9rem', fontWeight: 700, marginBottom: 6 }}>
+                      {ex.name}
+                    </h4>
+                    {ex.muscle_group && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {ex.muscle_group.split(',').map((m: string) => (
+                          <span key={m.trim()} className="badge" style={{ fontSize: '0.65rem', background: 'rgba(189, 0, 255, 0.1)', color: 'var(--miami-purple-light)', border: '1px solid rgba(189, 0, 255, 0.2)' }}>
+                            {m.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Admin link */}

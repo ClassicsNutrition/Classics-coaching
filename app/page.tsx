@@ -29,6 +29,15 @@ export default async function HomePage() {
   const programs = dbPrograms || [];
   const exercises = dbExercises || [];
 
+  let favoriteIds: string[] = [];
+  if (user) {
+    const { data: favs } = await supabase
+      .from('favorite_exercises')
+      .select('exercise_id')
+      .eq('user_id', user.id);
+    favoriteIds = favs?.map(f => f.exercise_id) || [];
+  }
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--miami-night)', color: '#F5F0FF' }}>
       <Navbar user={user} isAdmin={isAdmin} />
@@ -283,7 +292,12 @@ export default async function HomePage() {
               Rechercher un Exercice ou Programme
             </h2>
           </div>
-          <HomeLibrary programs={programs} exercises={exercises} />
+          <HomeLibrary 
+            programs={programs} 
+            exercises={exercises} 
+            user={user} 
+            initialFavorites={favoriteIds} 
+          />
         </div>
       </section>
 

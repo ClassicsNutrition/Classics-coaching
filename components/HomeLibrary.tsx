@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, Dumbbell, Play, X, Info, ArrowRight } from 'lucide-react';
+import { Search, Dumbbell, Play, X, Info, ArrowRight, Heart } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface Exercise {
   id: string;
@@ -24,12 +25,15 @@ interface Program {
 interface HomeLibraryProps {
   programs: Program[];
   exercises: Exercise[];
+  user?: any;
+  initialFavorites?: string[];
 }
 
 const MAIN_CATEGORIES = ['Tous', 'Pectoraux', 'Dos', 'Épaules', 'Bras', 'Jambes', 'Abdominaux'];
 
-function isExerciseMatchingMuscle(exercise: Exercise, selectedMuscle: string): boolean {
+function isExerciseMatchingMuscle(exercise: Exercise, selectedMuscle: string, favorites: string[]): boolean {
   if (selectedMuscle === 'Tous') return true;
+  if (selectedMuscle === 'Favoris') return favorites.includes(exercise.id);
   if (!exercise.muscle_group) return false;
   
   const portions = exercise.muscle_group.split(',').map(s => s.trim().toLowerCase());
@@ -44,10 +48,12 @@ function isExerciseMatchingMuscle(exercise: Exercise, selectedMuscle: string): b
   return portions.some(p => p.includes(search));
 }
 
-export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
+export default function HomeLibrary({ programs, exercises, user, initialFavorites = [] }: HomeLibraryProps) {
+  const supabase = createClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState('Tous');
   const [activeExercise, setActiveExercise] = useState<Exercise | null>(null);
+  const [favorites, setFavorites] = useState<string[]>(initialFavorites);
 
   // Filters
   const matchesSearch = (text: string) => text.toLowerCase().includes(searchTerm.toLowerCase());
@@ -58,11 +64,42 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
 
   const filteredExercises = exercises.filter(ex => {
     const matchesQuery = matchesSearch(ex.name) || (ex.muscle_group && matchesSearch(ex.muscle_group));
-    const matchesMuscle = isExerciseMatchingMuscle(ex, selectedMuscle);
+    const matchesMuscle = isExerciseMatchingMuscle(ex, selectedMuscle, favorites);
     return matchesQuery && matchesMuscle;
   });
 
   const hasSearch = searchTerm.trim().length > 0;
+
+  async function toggleFavorite(exerciseId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!user) {
+      alert("Connectez-vous pour ajouter cet exercice à vos favoris.");
+      return;
+    }
+    const isFav = favorites.includes(exerciseId);
+    setFavorites(prev => 
+      isFav ? prev.filter(id => id !== exerciseId) : [...prev, exerciseId]
+    );
+    if (isFav) {
+      const { error } = await supabase
+        .from('favorite_exercises')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('exercise_id', exerciseId);
+      if (error) {
+        console.error("Error removing favorite:", error.message);
+        setFavorites(prev => [...prev, exerciseId]);
+      }
+    } else {
+      const { error } = await supabase
+        .from('favorite_exercises')
+        .insert({ user_id: user.id, exercise_id: exerciseId });
+      if (error) {
+        console.error("Error adding favorite:", error.message);
+        setFavorites(prev => prev.filter(id => id !== exerciseId));
+      }
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32, width: '100%' }}>
@@ -243,7 +280,7 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
                 }}
                 className="scrollbar-hide"
               >
-                {MAIN_CATEGORIES.map(group => (
+                {(user ? [...MAIN_CATEGORIES, 'Favoris'] : MAIN_CATEGORIES).map(group => (
                   <button
                     key={group}
                     onClick={() => setSelectedMuscle(group)}
@@ -260,7 +297,7 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
                       transition: 'all 0.25s ease'
                     }}
                   >
-                    {group}
+                    {group === 'Favoris' ? '❤️ Favoris' : group}
                   </button>
                 ))}
               </div>
@@ -319,12 +356,53 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
                         <Dumbbell size={24} style={{ color: 'rgba(245, 240, 255, 0.2)' }} />
                       )}
                       
+                      {/* Favorite Heart Button */}
+                      <button
+                        onClick={(e) => toggleFavorite(ex.id, e)}
+                        style={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          zIndex: 10,
+                          background: 'rgba(7, 6, 26, 0.65)',
+                          backdropFilter: 'blur(4px)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '50%',
+                          width: 28,
+                          height: 28,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: favorites.includes(ex.id) ? 'var(--miami-pink)' : 'rgba(245, 240, 255, 0.7)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: favorites.includes(ex.id) ? '0 0 8px rgba(255, 10, 94, 0.3)' : 'none'
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.transform = 'scale(1.1)';
+                          e.currentTarget.style.color = 'var(--miami-pink)';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.transform = 'scale(1)';
+                          e.currentTarget.style.color = favorites.includes(ex.id) ? 'var(--miami-pink)' : 'rgba(245, 240, 255, 0.7)';
+                        }}
+                      >
+                        <Heart 
+                          size={14} 
+                          style={{ 
+                            fill: favorites.includes(ex.id) ? 'var(--miami-pink)' : 'none',
+                            transition: 'fill 0.2s ease'
+                          }} 
+                        />
+                      </button>
+
                       {/* Play overlay on hover */}
                       <div style={{
                         position: 'absolute', inset: 0, 
                         background: 'rgba(7, 6, 26, 0.4)', 
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        opacity: 0, transition: 'opacity 0.2s'
+                        opacity: 0, transition: 'opacity 0.2s',
+                        zIndex: 5
                       }}
                       className="play-overlay"
                       onMouseEnter={e => e.currentTarget.style.opacity = '1'}
@@ -458,18 +536,56 @@ export default function HomeLibrary({ programs, exercises }: HomeLibraryProps) {
                     ))}
                   </div>
                 )}
-                <h3 style={{ 
-                  fontFamily: 'var(--font-display)', 
-                  fontSize: '2.5rem', 
-                  fontWeight: 'normal', 
-                  color: 'white', 
-                  lineHeight: 1, 
-                  letterSpacing: '0.04em',
-                  margin: 0,
-                  paddingRight: 40
-                }}>
-                  {activeExercise.name}
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                  <h3 style={{ 
+                    fontFamily: 'var(--font-display)', 
+                    fontSize: '2.5rem', 
+                    fontWeight: 'normal', 
+                    color: 'white', 
+                    lineHeight: 1, 
+                    letterSpacing: '0.04em',
+                    margin: 0,
+                    flex: 1
+                  }}>
+                    {activeExercise.name}
+                  </h3>
+                  <button
+                    onClick={(e) => toggleFavorite(activeExercise.id, e)}
+                    style={{
+                      background: 'rgba(255, 10, 94, 0.1)',
+                      border: '1px solid rgba(255, 10, 94, 0.25)',
+                      borderRadius: '12px',
+                      padding: '8px 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      transition: 'all 0.2s',
+                      marginRight: 40
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(255, 10, 94, 0.2)';
+                      e.currentTarget.style.borderColor = 'var(--miami-pink)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'rgba(255, 10, 94, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(255, 10, 94, 0.25)';
+                    }}
+                  >
+                    <Heart 
+                      size={16} 
+                      style={{ 
+                        color: 'var(--miami-pink)', 
+                        fill: favorites.includes(activeExercise.id) ? 'var(--miami-pink)' : 'none',
+                        transition: 'fill 0.2s'
+                      }} 
+                    />
+                    {favorites.includes(activeExercise.id) ? 'Favori' : 'Ajouter aux favoris'}
+                  </button>
+                </div>
               </div>
 
               {/* Demo Animation Container */}
