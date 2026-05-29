@@ -8,6 +8,7 @@ interface ProductItem {
   name: string;
   category: 'Protéines' | 'Force & Performance' | 'Santé & Vitalité' | 'Sèche & Minceur';
   emoji: string;
+  image?: string;
   description: string;
   price: number;
   highlight: string;
@@ -17,70 +18,64 @@ interface ProductItem {
 
 const SUPPLEMENT_PRODUCTS: ProductItem[] = [
   {
-    id: 'whey-isolate',
-    name: '100% Whey Isolate Native',
+    id: 'whey-nutrimuscle',
+    name: 'Whey Native Isolate Nutrimuscle (1kg)',
     category: 'Protéines',
     emoji: '🥛',
-    description: 'Isolate de lactosérum natif non dénaturé de pureté maximale. Absorption ultra-rapide pour une synthèse protéique et une récupération musculaire optimales.',
-    price: 39.90,
-    highlight: '90% Protéine | Sans lactose',
+    image: '/products/nutrimuscle_whey_isolate.png',
+    description: 'Isolate de lactosérum natif extrait directement du lait frais de pâturage sans dénaturation. 90% de protéines pures hautement assimilables pour le maintien et la construction musculaire.',
+    price: 55.99,
+    highlight: '100% Native | 90% Protéine pure',
     rating: 4.9,
-    reviews: 142
+    reviews: 184
   },
   {
-    id: 'creatine-pure',
-    name: 'Pure Créatine Monohydrate',
+    id: 'mass-gainer-jumbo',
+    name: 'Scitec Nutrition Jumbo (Mass Gainer)',
+    category: 'Protéines',
+    emoji: '💪',
+    image: '/products/mass_gainer_jumbo.png',
+    description: 'Le gainer légendaire pour la prise de masse des physiques ectomorphes. Apporte un mélange de protéines de lactosérum et de glucides complexes multi-sources pour un développement maximal.',
+    price: 64.99,
+    highlight: '135g Glucides | 53g Protéines',
+    rating: 4.8,
+    reviews: 215
+  },
+  {
+    id: 'pre-workout-abe',
+    name: 'Applied Nutrition ABE (Pre-Workout)',
     category: 'Force & Performance',
     emoji: '⚡',
-    description: 'Créatine monohydrate micronisée haut de gamme (Creapure®). Augmente la force explosive, le volume musculaire et la vitesse de récupération entre les séries.',
-    price: 24.90,
-    highlight: '100% Creapure® | Pureté 99.9%',
-    rating: 4.8,
-    reviews: 98
-  },
-  {
-    id: 'pre-workout-storm',
-    name: 'Pre-Workout Storm (Booster)',
-    category: 'Force & Performance',
-    emoji: '🔥',
-    description: 'Formule explosive enrichie en L-Citrulline, Bêta-Alanine, Caféine et Tyrosine. Procure une congestion massive, une énergie débordante et un focus laser.',
+    image: '/products/pre_workout_abe.png',
+    description: 'All Black Everything (ABE) d\'Applied Nutrition. Conçu pour maximiser l\'énergie explosive, réduire la fatigue physique et booster la congestion grâce à la Citrulline, Créatine et Bêta-Alanine.',
     price: 34.90,
-    highlight: 'Congestion & Focus | Zéro crash',
-    rating: 4.7,
-    reviews: 115
-  },
-  {
-    id: 'omega-3-ultra',
-    name: 'Ultra Oméga-3 (Haute concentration)',
-    category: 'Santé & Vitalité',
-    emoji: '🐟',
-    description: 'Huile de poisson sauvage concentrée en EPA et DHA sous forme triglycéride. Anti-inflammatoire puissant pour protéger le cœur, le cerveau et les articulations.',
-    price: 19.90,
-    highlight: '800mg EPA / 400mg DHA',
-    rating: 4.9,
-    reviews: 76
-  },
-  {
-    id: 'fat-burner-shred',
-    name: 'Brûleur de Graisses - Shred Pro',
-    category: 'Sèche & Minceur',
-    emoji: '🌶️',
-    description: 'Complexe thermogénique à base de thé vert, carnitine, piment de cayenne et chrome. Accélère la combustion des graisses tenaces et contrôle l\'appétit.',
-    price: 29.90,
-    highlight: 'Thermogenèse | Coupe-faim naturel',
-    rating: 4.6,
-    reviews: 84
-  },
-  {
-    id: 'multi-vitamins',
-    name: 'Multi-Vitamines Athlète Co-enzymé',
-    category: 'Santé & Vitalité',
-    emoji: '💊',
-    description: 'Spectre complet de 24 vitamines et minéraux biodisponibles enrichi en antioxydants. Comble les carences alimentaires et optimise le métabolisme énergétique.',
-    price: 18.90,
-    highlight: 'Vitamines bio-actives | Sans fer',
+    highlight: 'Congestion explosive | 315mg Caféine',
     rating: 4.8,
-    reviews: 121
+    reviews: 312
+  },
+  {
+    id: 'eaa-naughty-boy',
+    name: 'Naughty Boy Lifestyle (EAA)',
+    category: 'Force & Performance',
+    emoji: '🌿',
+    image: '/products/naughty_boy_eaa.png',
+    description: 'Les 9 acides aminés essentiels de Naughty Boy Lifestyle pour optimiser la récupération et freiner le catabolisme. Formule enrichie en électrolytes d\'eau de coco pour une hydratation maximale.',
+    price: 29.99,
+    highlight: 'Aminogramme complet | Hydratation',
+    rating: 4.7,
+    reviews: 94
+  },
+  {
+    id: 'barebells-bar',
+    name: 'Barebells Protein Bar (L\'unité)',
+    category: 'Protéines',
+    emoji: '🍫',
+    image: '/products/barebells_protein_bar.png',
+    description: 'La célèbre barre protéinée Barebells au goût et à la texture incomparables sans sucre ajouté. Offre un en-cas sain et savoureux pour calmer les envies de sucre tout en apportant 20g de protéines.',
+    price: 2.00,
+    highlight: '20g Protéines | Sans sucres ajoutés',
+    rating: 4.9,
+    reviews: 412
   }
 ];
 
@@ -344,10 +339,15 @@ export default function ShopLibrary({ user, isAdmin }: ShopLibraryProps) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2.2rem',
-                border: '1px solid rgba(255, 255, 255, 0.05)'
+                fontSize: product.image ? 'normal' : '2.2rem',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                overflow: 'hidden'
               }}>
-                {product.emoji}
+                {product.image ? (
+                  <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  product.emoji
+                )}
               </div>
               <div>
                 <span style={{ 
