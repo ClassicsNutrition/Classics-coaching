@@ -33,10 +33,10 @@ async function main() {
   for (const g of guesses) {
     let minX = W, maxX = 0, minY = H, maxY = 0;
     
-    // Scan a neighborhood of 100px around the guess center
-    const radius = 95;
-    for (let dy = -radius; dy <= radius; dy++) {
-      for (let dx = -radius; dx <= radius; dx++) {
+    const radiusX = 80;
+    const radiusY = 110;
+    for (let dy = -radiusY; dy <= radiusY; dy++) {
+      for (let dx = -radiusX; dx <= radiusX; dx++) {
         const px = g.x + dx;
         const py = g.y + dy;
         
