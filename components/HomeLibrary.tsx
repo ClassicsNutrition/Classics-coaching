@@ -217,78 +217,11 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
         )}
       </div>
 
-      {/* Grid of Results */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 32, alignItems: 'start' }}>
+      {/* Vertical Stack of Results */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 48, width: '100%' }}>
         
-        {/* Left Column: Public Programs */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <div className="card-glass" style={{ padding: '32px 24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-              <div style={{ 
-                width: 40, 
-                height: 40, 
-                borderRadius: 10, 
-                background: 'rgba(0, 245, 255, 0.1)', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                color: 'var(--miami-cyan)',
-                boxShadow: '0 0 10px rgba(0, 245, 255, 0.2)'
-              }}>
-                <Dumbbell size={20} />
-              </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>
-                {hasSearch ? 'Programmes correspondants' : 'Nos Programmes'}
-              </h2>
-            </div>
-
-            {filteredPrograms.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 16px', color: 'rgba(245, 240, 255, 0.4)' }}>
-                <Dumbbell size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
-                <p style={{ fontSize: '0.9rem' }}>Aucun programme correspondant</p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {filteredPrograms.map(p => (
-                  <Link 
-                    key={p.id} 
-                    href={`/programs/${p.slug}`} 
-                    className="hover-lift"
-                    style={{
-                      display: 'flex', 
-                      flexDirection: 'column',
-                      gap: 8,
-                      padding: '20px',
-                      background: 'rgba(0, 245, 255, 0.04)',
-                      border: '1px solid rgba(0, 245, 255, 0.15)',
-                      borderRadius: 14, 
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--miami-cyan)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0, 245, 255, 0.15)'}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-display)', letterSpacing: '0.04em' }}>
-                        {p.title}
-                      </span>
-                      <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>Découvrir <ArrowRight size={10} style={{ marginLeft: 2 }} /></span>
-                    </div>
-                    {p.description && (
-                      <p style={{ fontSize: '0.85rem', color: 'rgba(245, 240, 255, 0.6)', lineHeight: 1.5, margin: 0 }}>
-                        {p.description.length > 90 ? `${p.description.slice(0, 90)}...` : p.description}
-                      </p>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Column: Public Exercises Grid */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {/* Top: Public Exercises Grid */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
           <div className="card-glass" style={{ padding: '32px 24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -570,6 +503,73 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
                   </div>
                 )}
               </>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom: Public Programs */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
+          <div className="card-glass" style={{ padding: '32px 24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+              <div style={{ 
+                width: 40, 
+                height: 40, 
+                borderRadius: 10, 
+                background: 'rgba(0, 245, 255, 0.1)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                color: 'var(--miami-cyan)',
+                boxShadow: '0 0 10px rgba(0, 245, 255, 0.2)'
+              }}>
+                <Dumbbell size={20} />
+              </div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>
+                {hasSearch ? 'Programmes correspondants' : 'Nos Programmes'}
+              </h2>
+            </div>
+
+            {filteredPrograms.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: 'rgba(245, 240, 255, 0.4)' }}>
+                <Dumbbell size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
+                <p style={{ fontSize: '0.9rem' }}>Aucun programme correspondant</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
+                {filteredPrograms.map(p => (
+                  <Link 
+                    key={p.id} 
+                    href={`/programs/${p.slug}`} 
+                    className="hover-lift"
+                    style={{
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      gap: 8,
+                      padding: '20px',
+                      background: 'rgba(0, 245, 255, 0.04)',
+                      border: '1px solid rgba(0, 245, 255, 0.15)',
+                      borderRadius: 14, 
+                      textDecoration: 'none',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--miami-cyan)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0, 245, 255, 0.15)'}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-display)', letterSpacing: '0.04em' }}>
+                        {p.title}
+                      </span>
+                      <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>Découvrir <ArrowRight size={10} style={{ marginLeft: 2 }} /></span>
+                    </div>
+                    {p.description && (
+                      <p style={{ fontSize: '0.85rem', color: 'rgba(245, 240, 255, 0.6)', lineHeight: 1.5, margin: 0 }}>
+                        {p.description.length > 90 ? `${p.description.slice(0, 90)}...` : p.description}
+                      </p>
+                    )}
+                  </Link>
+                ))}
+              </div>
             )}
           </div>
         </div>
