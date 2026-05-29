@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, User, LogOut, BookOpen, Dumbbell, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Menu, X, User, LogOut, BookOpen, Dumbbell, ShieldCheck, ChevronDown, ShoppingBag } from 'lucide-react';
 
 interface NavbarProps {
   user: any;
@@ -236,6 +236,7 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
           </div>
 
           <Link href="/programs" className="btn-ghost" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Programmes</Link>
+          <Link href="/shop" className="btn-ghost" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Boutique</Link>
           
           {isAdmin && (
             <Link href="/admin" className="btn-ghost" style={{ fontSize: '0.85rem', color: 'var(--miami-cyan)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -400,6 +401,10 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
 
         <Link href="/programs" onClick={toggleMenu} className="mobile-nav-link">
           <Dumbbell /> Programmes
+        </Link>
+
+        <Link href="/shop" onClick={toggleMenu} className="mobile-nav-link">
+          <ShoppingBag /> Boutique
         </Link>
         
         {isAdmin && (
