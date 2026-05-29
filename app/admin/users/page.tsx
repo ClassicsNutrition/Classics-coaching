@@ -104,11 +104,15 @@ export default function AdminUsersPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ 
                           width: 40, height: 40, borderRadius: '50%', 
-                          background: u.is_banned ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #FF2D78, #7B2FBE)', 
+                          background: u.avatar_url ? 'transparent' : (u.is_banned ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #FF2D78, #7B2FBE)'), 
                           display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
-                          fontSize: '1rem', fontWeight: 700
+                          fontSize: '1rem', fontWeight: 700, overflow: 'hidden', flexShrink: 0
                         }}>
-                          {(u.full_name || u.email || '?')[0].toUpperCase()}
+                          {u.avatar_url ? (
+                            <img src={u.avatar_url} alt={u.full_name || 'User'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            (u.full_name || u.email || '?')[0].toUpperCase()
+                          )}
                         </div>
                         <div>
                           <div style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { LogOut, BookOpen, Dumbbell, User, Clock, Heart } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProfileFavoritesList from '@/components/ProfileFavoritesList';
+import ProfileAvatarEditor from '@/components/ProfileAvatarEditor';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -61,16 +62,11 @@ export default async function ProfilePage() {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px' }}>
         {/* Profile Header */}
         <div className="card-glass animate-fadeInUp" style={{ padding: 'clamp(24px, 5vw, 40px)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
-          <div style={{
-            width: 80, height: 80, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #FF2D78, #7B2FBE)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2rem', fontWeight: 800, color: 'white',
-            boxShadow: '0 0 30px rgba(255,45,120,0.4)',
-            flexShrink: 0
-          }}>
-            {displayName.charAt(0).toUpperCase()}
-          </div>
+          <ProfileAvatarEditor 
+            currentAvatarUrl={profile?.avatar_url} 
+            userId={user.id} 
+            displayName={displayName} 
+          />
           <div style={{ flex: '1 1 300px' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 800, color: 'white', marginBottom: 4 }}>
               Bonjour, {displayName} 👋
