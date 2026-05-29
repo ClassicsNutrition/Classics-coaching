@@ -13,11 +13,14 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileExercisesOpen, setIsMobileExercisesOpen] = useState(false);
+  const [isFoodDropdownOpen, setIsFoodDropdownOpen] = useState(false);
+  const [isMobileFoodOpen, setIsMobileFoodOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
     if (isOpen) {
-      setIsMobileExercisesOpen(false); // Close accordion when closing menu
+      setIsMobileExercisesOpen(false);
+      setIsMobileFoodOpen(false);
     }
   };
 
@@ -28,6 +31,15 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
     { name: 'Biceps & Bras', param: 'Bras', icon: '🔥' },
     { name: 'Jambes', param: 'Jambes', icon: '🦵' },
     { name: 'Abdominaux', param: 'Abdominaux', icon: '🍫' }
+  ];
+
+  const foodCategories = [
+    { name: 'Tous les aliments', param: 'Tous', icon: '🥗' },
+    { name: 'Légumes', param: 'Légumes', icon: '🥦' },
+    { name: 'Fruits', param: 'Fruits', icon: '🍎' },
+    { name: 'Féculents & Grains', param: 'Féculents', icon: '🍠' },
+    { name: 'Protéines', param: 'Protéines', icon: '🍗' },
+    { name: 'Laitages & Alts', param: 'Laitages', icon: '🥛' }
   ];
 
   return (
@@ -144,6 +156,85 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
             )}
           </div>
 
+          {/* Desktop Dropdown: Alimentation */}
+          <div 
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setIsFoodDropdownOpen(true)}
+            onMouseLeave={() => setIsFoodDropdownOpen(false)}
+          >
+            <button 
+              className="btn-ghost" 
+              style={{ 
+                fontSize: '0.85rem', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.05em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                cursor: 'pointer',
+                background: 'transparent',
+                border: '1px solid rgba(226, 232, 240, 0.1)',
+                padding: '10px 20px',
+                borderRadius: '10px',
+                color: 'rgba(226, 232, 240, 0.7)'
+              }}
+            >
+              Alimentation <ChevronDown size={14} style={{ transform: isFoodDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+
+            {isFoodDropdownOpen && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  background: 'rgba(7, 6, 26, 0.98)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid var(--miami-border)',
+                  borderRadius: 14,
+                  padding: '12px 0',
+                  minWidth: 210,
+                  boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 245, 255, 0.12)',
+                  zIndex: 150,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  marginTop: 6
+                }}
+              >
+                {foodCategories.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={`/alimentation?category=${item.param}`}
+                    style={{
+                      padding: '10px 20px',
+                      fontSize: '0.85rem',
+                      color: 'rgba(245, 240, 255, 0.8)',
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      transition: 'all 0.2s ease-in-out',
+                      fontWeight: 600
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(0, 245, 255, 0.08)';
+                      e.currentTarget.style.color = 'var(--miami-cyan)';
+                      e.currentTarget.style.paddingLeft = '24px';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = 'rgba(245, 240, 255, 0.8)';
+                      e.currentTarget.style.paddingLeft = '20px';
+                    }}
+                  >
+                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span> {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
           <Link href="/programs" className="btn-ghost" style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Programmes</Link>
           
           {isAdmin && (
@@ -232,6 +323,62 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
                 <Link
                   key={item.name}
                   href={`/?muscle=${item.param}#exercises-library`}
+                  onClick={toggleMenu}
+                  style={{
+                    padding: '10px 16px',
+                    fontSize: '0.9rem',
+                    color: 'rgba(245, 240, 255, 0.75)',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    fontWeight: 500
+                  }}
+                >
+                  <span style={{ fontSize: '1.1rem' }}>{item.icon}</span> {item.name}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Accordion: Alimentation */}
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+          <button 
+            onClick={() => setIsMobileFoodOpen(!isMobileFoodOpen)}
+            className="mobile-nav-link"
+            style={{ 
+              width: '100%', 
+              background: 'none', 
+              border: 'none', 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}><BookOpen /> Alimentation</span>
+            <ChevronDown size={18} style={{ transform: isMobileFoodOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', marginRight: 8 }} />
+          </button>
+          
+          {isMobileFoodOpen && (
+            <div style={{ 
+              paddingLeft: 28, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 2, 
+              background: 'rgba(255, 255, 255, 0.02)', 
+              borderRadius: 12, 
+              margin: '4px 12px 12px 12px',
+              border: '1px solid rgba(255,255,255,0.05)',
+              paddingTop: 6,
+              paddingBottom: 6
+            }}>
+              {foodCategories.map((item) => (
+                <Link
+                  key={item.name}
+                  href={`/alimentation?category=${item.param}`}
                   onClick={toggleMenu}
                   style={{
                     padding: '10px 16px',
