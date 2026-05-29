@@ -43,6 +43,16 @@ interface HomeLibraryProps {
 
 const MAIN_CATEGORIES = ['Tous', 'Pectoraux', 'Dos', 'Épaules', 'Bras', 'Jambes', 'Abdominaux'];
 
+const OBJECTIVES = [
+  { name: 'Les Top Exercices', param: 'Tous', desc: 'Mouvements fondamentaux de musculation.', icon: '🔥', glow: 'rgba(255, 10, 94, 0.25)', color: 'var(--miami-pink)' },
+  { name: 'Explose tes Pecs', param: 'Pectoraux', desc: 'Pectoraux massifs et volumineux.', icon: '💪', glow: 'rgba(0, 245, 255, 0.25)', color: 'var(--miami-cyan)' },
+  { name: 'Dos en V', param: 'Dos', desc: 'Cible l\'épaisseur et la largeur du dos.', icon: '🦅', glow: 'rgba(189, 0, 255, 0.25)', color: 'var(--miami-purple-light)' },
+  { name: 'Épaules 3D', param: 'Épaules', desc: 'Deltoïdes volumineux et galbés.', icon: '🛡️', glow: 'rgba(250, 204, 21, 0.25)', color: '#facc15' },
+  { name: 'Explose tes Bras', param: 'Bras', desc: 'Biceps massifs et triceps dessinés.', icon: '⚡', glow: 'rgba(0, 245, 255, 0.25)', color: 'var(--miami-cyan)' },
+  { name: 'Cuisses d\'Acier', param: 'Jambes', desc: 'Quadriceps, ischios et mollets puissants.', icon: '🦵', glow: 'rgba(255, 10, 94, 0.25)', color: 'var(--miami-pink)' },
+  { name: 'Abdos en Béton', param: 'Abdominaux', desc: 'Gainage et sangle abdominale tracés.', icon: '🍫', glow: 'rgba(189, 0, 255, 0.25)', color: 'var(--miami-purple-light)' }
+];
+
 function isExerciseMatchingMuscle(exercise: Exercise, selectedMuscle: string, favorites: string[]): boolean {
   if (selectedMuscle === 'Tous') return true;
   if (selectedMuscle === 'Favoris') return favorites.includes(exercise.id);
@@ -296,7 +306,7 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
                   <Play size={20} />
                 </div>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 'normal', color: 'white', letterSpacing: '0.04em' }}>
-                  Exercices Disponibles
+                  Choisis ton Objectif
                 </h2>
               </div>
               <div className="badge badge-pink" style={{ letterSpacing: '0.05em' }}>
@@ -304,39 +314,73 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
               </div>
             </div>
 
-            {/* Muscle Group Tab Filters */}
+            {/* Objective Cards Grid */}
             {!hasSearch && (
               <div 
                 style={{ 
-                  display: 'flex', 
-                  gap: 8, 
-                  overflowX: 'auto', 
-                  paddingBottom: 12, 
-                  marginBottom: 20,
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                  gap: 16, 
+                  marginBottom: 32,
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                  paddingBottom: 24
                 }}
-                className="scrollbar-hide"
               >
-                {(user ? [...MAIN_CATEGORIES, 'Favoris'] : MAIN_CATEGORIES).map(group => (
-                  <button
-                    key={group}
-                    onClick={() => setSelectedMuscle(group)}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: 20,
-                      background: selectedMuscle === group ? 'var(--miami-pink)' : 'rgba(255, 255, 255, 0.04)',
-                      border: `1px solid ${selectedMuscle === group ? 'var(--miami-pink)' : 'rgba(255, 255, 255, 0.08)'}`,
-                      color: selectedMuscle === group ? 'white' : 'rgba(245, 240, 255, 0.7)',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      transition: 'all 0.25s ease'
-                    }}
-                  >
-                    {group === 'Favoris' ? '❤️ Favoris' : group}
-                  </button>
-                ))}
+                {(user 
+                  ? [...OBJECTIVES, { name: 'Mes Favoris', param: 'Favoris', desc: 'Vos mouvements préférés enregistrés.', icon: '❤️', glow: 'rgba(255, 10, 94, 0.25)', color: 'var(--miami-pink)' }] 
+                  : OBJECTIVES
+                ).map(obj => {
+                  const isSelected = selectedMuscle === obj.param;
+                  return (
+                    <div
+                      key={obj.param}
+                      onClick={() => setSelectedMuscle(obj.param)}
+                      className="hover-lift"
+                      style={{
+                        background: isSelected ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.01)',
+                        border: `1px solid ${isSelected ? obj.color : 'rgba(255, 255, 255, 0.06)'}`,
+                        borderRadius: 14,
+                        padding: '16px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6,
+                        transition: 'all 0.3s ease',
+                        boxShadow: isSelected ? `0 0 15px ${obj.glow}` : 'none',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                      onMouseEnter={e => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.01)';
+                        }
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: '1.25rem' }}>{obj.icon}</span>
+                        <span style={{ 
+                          color: 'white', 
+                          fontWeight: 700, 
+                          fontSize: '0.95rem',
+                          fontFamily: 'var(--font-display)',
+                          letterSpacing: '0.03em'
+                        }}>
+                          {obj.name}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: 'rgba(245, 240, 255, 0.55)', lineHeight: 1.3 }}>
+                        {obj.desc}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
