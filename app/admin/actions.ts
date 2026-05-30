@@ -88,3 +88,92 @@ export async function toggleAdminRole(userId: string, currentRole: string) {
   revalidatePath('/admin/users');
   return { success: true };
 }
+
+export async function getPendingReservationsCount() {
+  const supabase = await createAdminClient();
+  const { count, error } = await supabase
+    .from('reservations')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pending');
+  if (error) return 0;
+  return count || 0;
+}
+
+export async function getPendingReservations() {
+  const supabase = await createAdminClient();
+  
+  const { data: res, error } = await supabase
+    .from('reservations')
+    .select('id, user_id, content_type, content_id, status, created_at')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  if (!res || res.length === 0) return [];
+  
+  const usersList = await getAdminUsersList();
+  const { data: programs } = await supabase.from('programs').select('id, title');
+  const { data: ebooks } = await supabase.from('ebooks').select('id, title');
+  
+  return res.map((r: any) => {
+    const user = usersList.find(u => u.id === r.user_id);
+    let contentTitle = 'Inconnu';
+    if (r.content_type === 'program') {
+      contentTitle = programs?.find(p => p.id === r.content_id)?.title || 'Programme Inconnu';
+    } else if (r.content_type === 'ebook') {
+      contentTitle = ebooks?.find(e => e.id === r.content_id)?.title || 'E-book Inconnu';
+    }
+    
+    return {
+      ...r,
+      user_name: user?.full_name || 'Inconnu',
+      user_email: user?.email || 'Inconnu',
+      content_title: contentTitle
+    };
+  });
+}
+
+export async function getAdminReservations() {
+  const supabase = await createAdminClient();
+  
+  const { data: res, error } = await supabase
+    .from('reservations')
+    .select('id, user_id, content_type, content_id, status, created_at')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  if (!res || res.length === 0) return [];
+  
+  const usersList = await getAdminUsersList();
+  const { data: programs } = await supabase.from('programs').select('id, title');
+  const { data: ebooks } = await supabase.from('ebooks').select('id, title');
+  
+  return res.map((r: any) => {
+    const user = usersList.find(u => u.id === r.user_id);
+    let contentTitle = 'Inconnu';
+    if (r.content_type === 'program') {
+      contentTitle = programs?.find(p => p.id === r.content_id)?.title || 'Programme Inconnu';
+    } else if (r.content_type === 'ebook') {
+      contentTitle = ebooks?.find(e => e.id === r.content_id)?.title || 'E-book Inconnu';
+    }
+    
+    return {
+      ...r,
+      user_name: user?.full_name || 'Inconnu',
+      user_email: user?.email || 'Inconnu',
+      content_title: contentTitle
+    };
+  });
+}
+
+export async function updateReservationStatus(id: string, status: 'granted' | 'revoked' | 'pending') {
+  const supabase = await createAdminClient();
+  const { error } = await supabase
+    .from('reservations')
+    .update({ status })
+    .eq('id', id);
+  if (error) throw error;
+  
+  revalidatePath('/admin/users');
+  return { success: true };
+}
