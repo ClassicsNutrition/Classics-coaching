@@ -52,16 +52,21 @@ function AdminChatContent() {
 
   // Handle opening or creating a room from URL userId param
   useEffect(() => {
-    if (targetUserId && rooms.length > 0) {
+    if (targetUserId && !loadingRooms) {
       handleOpenOrCreateRoom(targetUserId);
     }
-  }, [targetUserId, rooms.length]);
+  }, [targetUserId, loadingRooms]);
 
   async function handleOpenOrCreateRoom(userId: string) {
     try {
       const room = await createChatRoom(userId);
-      // Find room in the list to get full details (like user_name)
-      const fullRoom = rooms.find((r: any) => r.id === room.id) || {
+      
+      // Fetch the updated rooms list so the new room is included with user details
+      const updatedRooms = await getAdminChatRooms();
+      setRooms(updatedRooms);
+      
+      // Find room in the list to get full details (like user_name, user_email)
+      const fullRoom = updatedRooms.find((r: any) => r.id === room.id) || {
         ...room,
         user_name: 'Client',
         user_email: ''
