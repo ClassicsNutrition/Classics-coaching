@@ -59,7 +59,8 @@ export default function AdminSidebar() {
         position: 'sticky',
         top: 0,
         zIndex: 1001,
-        height: 60
+        height: 60,
+        display: 'none'
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <img src="/logo.png" alt="Logo" style={{ height: 28, width: 'auto' }} />
