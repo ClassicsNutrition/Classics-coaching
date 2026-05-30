@@ -47,11 +47,11 @@ export default async function HomePage() {
       <section 
         className="miami-grid-bg" 
         style={{ 
-          paddingTop: 160, 
-          paddingBottom: 120, 
+          paddingTop: 120, 
+          paddingBottom: 60, 
           position: 'relative', 
           overflow: 'hidden',
-          background: 'radial-gradient(ellipse at 50% 100%, rgba(255, 90, 146, 0.15) 0%, rgba(189, 0, 255, 0.08) 50%, var(--miami-night) 100%)'
+          background: 'radial-gradient(ellipse at 50% 100%, rgba(255, 90, 146, 0.12) 0%, rgba(189, 0, 255, 0.06) 50%, var(--miami-night) 100%)'
         }}
       >
         {/* SVG Decorative Palm Trees in Hero */}
@@ -70,55 +70,177 @@ export default async function HomePage() {
         <div style={{
           position: 'absolute', top: 80, right: '15%', width: 450, height: 450,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,10,94,0.18) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,10,94,0.15) 0%, transparent 70%)',
           filter: 'blur(70px)',
           pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', bottom: 80, left: '10%', width: 350, height: 350,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,245,255,0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(0,245,255,0.12) 0%, transparent 70%)',
           filter: 'blur(70px)',
           pointerEvents: 'none',
         }} />
 
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <h1 className="animate-fadeInUp" style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(3.5rem, 8vw, 6.5rem)',
-            fontWeight: 'normal',
-            lineHeight: 0.95,
-            letterSpacing: '0.04em',
-            marginBottom: 24,
-            textShadow: '0 0 30px rgba(255,10,94,0.3)',
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
+          
+          {/* Split Container */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '48px',
+            flexWrap: 'wrap',
+            textAlign: 'left'
           }}>
-            <span style={{ color: 'white' }}>Transformez votre</span>{' '}
-            <br />
-            <span className="gradient-miami-text" style={{ filter: 'drop-shadow(0 0 15px rgba(189,0,255,0.2))' }}>corps & votre esprit</span>
-          </h1>
+            
+            {/* Left Column: Heading and CTAs */}
+            <div style={{ flex: '1 1 540px', minWidth: 300 }}>
+              <h1 className="animate-fadeInUp" style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(2.5rem, 5vw, 4.2rem)',
+                fontWeight: 'normal',
+                lineHeight: 1.05,
+                letterSpacing: '0.03em',
+                marginBottom: 20,
+                textShadow: '0 0 30px rgba(255,10,94,0.15)',
+                color: 'white'
+              }}>
+                Transformez votre <br />
+                <span className="gradient-miami-text" style={{ filter: 'drop-shadow(0 0 15px rgba(189,0,255,0.15))' }}>corps & votre esprit</span>
+              </h1>
 
-          <p className="animate-fadeInUp animate-delay-100" style={{
-            fontSize: 'clamp(1rem, 2vw, 1.3rem)',
-            color: 'rgba(245,240,255,0.7)',
-            maxWidth: 650,
-            margin: '0 auto 40px',
-            lineHeight: 1.7,
-          }}>
-            La plateforme de bien-être & nutrition de <strong style={{ color: 'var(--miami-cyan)', textShadow: '0 0 10px rgba(0,245,255,0.3)' }}>Smain Chebab</strong>. Des programmes d&#39;entraînement ciblés, un guide alimentaire de santé et une boutique de compléments intégrée.
-          </p>
+              <p className="animate-fadeInUp animate-delay-100" style={{
+                fontSize: 'clamp(1rem, 2vw, 1.15rem)',
+                color: 'rgba(245,240,255,0.7)',
+                maxWidth: 580,
+                margin: '0 0 32px 0',
+                lineHeight: 1.6,
+              }}>
+                Coaching sportif et nutrition de précision par <strong style={{ color: 'var(--miami-cyan)', textShadow: '0 0 10px rgba(0,245,255,0.2)' }}>Smain Chebab</strong>. Accédez à vos programmes ciblés, explorez notre guide alimentaire de santé et découvrez nos services.
+              </p>
 
-          <div className="animate-fadeInUp animate-delay-200" style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <Link href="/programs" className="btn-primary" style={{ fontSize: '1rem', padding: '14px 32px', letterSpacing: '0.05em' }}>
-              <Dumbbell size={18} /> Nos Programmes
-            </Link>
-            <Link href="/shop" className="btn-secondary" style={{ fontSize: '1rem', padding: '14px 32px', letterSpacing: '0.05em' }}>
-              <ShoppingBag size={18} /> Boutique Compléments
-            </Link>
+              <div className="animate-fadeInUp animate-delay-200" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                <Link href="/programs" className="btn-primary" style={{ fontSize: '0.95rem', padding: '12px 28px', letterSpacing: '0.05em' }}>
+                  <Dumbbell size={16} /> Nos Programmes
+                </Link>
+                <Link href="/shop" className="btn-secondary" style={{ fontSize: '0.95rem', padding: '12px 28px', letterSpacing: '0.05em' }}>
+                  <ShoppingBag size={16} /> Boutique Compléments
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Column: 2x2 Feature Cards Grid */}
+            <div className="animate-fadeInUp animate-delay-100" style={{ flex: '1 1 480px', minWidth: 300 }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: 16,
+                width: '100%'
+              }}>
+                {[
+                  {
+                    icon: <Dumbbell size={22} />,
+                    title: 'Programmes Sportifs',
+                    desc: 'Plans ciblés de force, sèche ou prise de masse.',
+                    color: 'var(--miami-cyan)',
+                    href: '/programs',
+                  },
+                  {
+                    icon: <Apple size={22} />,
+                    title: 'Nutrition & Aliments',
+                    desc: 'Encyclopédie d\'aliments sains et leurs bienfaits.',
+                    color: '#00FF66',
+                    href: '/alimentation',
+                  },
+                  {
+                    icon: <ShoppingBag size={22} />,
+                    title: 'Boutique Compléments',
+                    desc: 'Achetez vos suppléments premium en ligne.',
+                    color: 'var(--miami-pink)',
+                    href: '/shop',
+                  },
+                  {
+                    icon: <BookOpen size={22} />,
+                    title: 'E-books & Guides',
+                    desc: 'Conseils experts rédigés par Smain Chebab.',
+                    color: 'var(--miami-purple-light)',
+                    href: '/ebooks',
+                  },
+                ].map((feat) => (
+                  <Link
+                    key={feat.title}
+                    href={feat.href}
+                    className="card-glass card-glass-hover"
+                    style={{
+                      padding: '24px 20px',
+                      textDecoration: 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12,
+                      borderRadius: 16,
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {/* Visual border marker */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '3px',
+                      height: '24px',
+                      background: feat.color,
+                      borderRadius: '0 0 4px 0'
+                    }} />
+
+                    <div style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 10,
+                      background: `${feat.color}15`,
+                      border: `1px solid ${feat.color}35`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: feat.color,
+                      boxShadow: `0 0 10px ${feat.color}15`
+                    }}>
+                      {feat.icon}
+                    </div>
+
+                    <div>
+                      <h3 style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '1.2rem',
+                        fontWeight: 'normal',
+                        color: 'white',
+                        marginBottom: 6,
+                        letterSpacing: '0.02em'
+                      }}>
+                        {feat.title}
+                      </h3>
+                      <p style={{
+                        fontSize: '0.85rem',
+                        color: 'rgba(245, 240, 255, 0.65)',
+                        lineHeight: 1.45,
+                        margin: 0
+                      }}>
+                        {feat.desc}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
           </div>
 
           {/* Stats Section with Neon Cards */}
-          <div className="animate-fadeInUp animate-delay-400" style={{
-            display: 'flex', justifyContent: 'center', gap: 32, marginTop: 80,
+          <div className="animate-fadeInUp animate-delay-300" style={{
+            display: 'flex', justifyContent: 'center', gap: 24, marginTop: 80,
             flexWrap: 'wrap',
           }}>
             {[
@@ -135,8 +257,8 @@ export default async function HomePage() {
                   border: `1px solid ${stat.border}`,
                   boxShadow: `0 8px 32px rgba(7, 6, 26, 0.5), 0 0 20px ${stat.glow}`,
                   borderRadius: 16,
-                  padding: '24px 40px',
-                  minWidth: 240,
+                  padding: '20px 32px',
+                  minWidth: 220,
                   backdropFilter: 'blur(10px)',
                   position: 'relative',
                   overflow: 'hidden',
@@ -146,10 +268,10 @@ export default async function HomePage() {
                 {/* Neon Top Border Accent */}
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: `linear-gradient(90deg, transparent, ${stat.border.replace('0.3', '1')}, transparent)` }} />
                 
-                <div style={{ fontSize: '1.8rem', marginBottom: 10 }}>{stat.icon}</div>
+                <div style={{ fontSize: '1.6rem', marginBottom: 6 }}>{stat.icon}</div>
                 <div style={{ 
                   fontFamily: 'var(--font-display)', 
-                  fontSize: '3.5rem', 
+                  fontSize: '2.8rem', 
                   fontWeight: 'normal', 
                   color: 'white', 
                   lineHeight: 1,
@@ -157,133 +279,13 @@ export default async function HomePage() {
                 }} className="gradient-miami-text">
                   {stat.value}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'rgba(226,232,240,0.6)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(226,232,240,0.6)', marginTop: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   {stat.label}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section style={{ padding: '100px 24px', maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <div className="badge badge-cyan" style={{ display: 'inline-flex', marginBottom: 16, letterSpacing: '0.1em' }}>L&#39;ÉCOSYSTÈME COMPLET</div>
-          <h2 style={{ 
-            fontFamily: 'var(--font-display)', 
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
-            fontWeight: 'normal', 
-            letterSpacing: '0.05em',
-            color: 'white',
-            textShadow: '0 0 20px rgba(0,245,255,0.25)'
-          }}>
-            Tout ce dont vous avez besoin
-          </h2>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
-          {[
-            {
-              icon: <Dumbbell size={28} />,
-              title: 'Programmes Sportifs',
-              desc: 'Des plans d\'entraînement structurés (Prise de masse, Perte de poids, Force, Sèche) pour guider vos séances.',
-              color: 'var(--miami-cyan)',
-              href: '/programs',
-            },
-            {
-              icon: <Apple size={28} />,
-              title: 'Nutrition & Aliments',
-              desc: 'Accédez à notre encyclopédie d\'aliments sains et découvrez en détail leurs bienfaits pour structurer vos repas.',
-              color: '#00FF66',
-              href: '/alimentation',
-            },
-            {
-              icon: <ShoppingBag size={28} />,
-              title: 'Compléments Premium',
-              desc: 'Commandez vos suppléments professionnels (Whey Native, Pre-workout, EAA) directement sur notre boutique intégrée.',
-              color: 'var(--miami-pink)',
-              href: '/shop',
-            },
-            {
-              icon: <BookOpen size={28} />,
-              title: 'E-books de Référence',
-              desc: 'Des guides théoriques et pratiques complets rédigés par Smain Chebab pour maîtriser les bases du fitness.',
-              color: 'var(--miami-purple-light)',
-              href: '/ebooks',
-            },
-            {
-              icon: <Sparkles size={28} />,
-              title: 'Fiches d\'Exercices',
-              desc: 'Maîtrisez l\'exécution de plus de 35 mouvements avec des démonstrations animées et des conseils d\'expert.',
-              color: '#FFB000',
-              href: '/exercises',
-            },
-            {
-              icon: <Heart size={28} />,
-              title: 'Suivi & Favoris',
-              desc: 'Enregistrez vos exercices favoris et suivez votre progression en vous connectant à votre espace membre.',
-              color: '#00E5FF',
-              href: user ? '/profile' : '/register',
-            },
-          ].map((feature) => (
-            <Link
-              key={feature.title}
-              href={feature.href}
-              className="card-glass card-glass-hover"
-              style={{ 
-                padding: 32, 
-                textDecoration: 'none', 
-                display: 'block',
-                position: 'relative',
-                overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.05)'
-              }}
-            >
-              {/* Colored top-left border decoration */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '4px',
-                height: '40px',
-                background: feature.color,
-                borderRadius: '0 0 4px 0'
-              }} />
-
-              <div style={{
-                width: 56,
-                height: 56,
-                borderRadius: 14,
-                background: `${feature.color}15`,
-                border: `1px solid ${feature.color}35`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: feature.color,
-                marginBottom: 20,
-                boxShadow: `0 0 15px ${feature.color}15`
-              }}>
-                {feature.icon}
-              </div>
-              <h3 style={{ 
-                fontFamily: 'var(--font-display)', 
-                fontSize: '1.8rem', 
-                fontWeight: 'normal', 
-                letterSpacing: '0.04em',
-                color: 'white', 
-                marginBottom: 12 
-              }}>
-                {feature.title}
-              </h3>
-              <p style={{ fontSize: '0.95rem', color: 'rgba(245,240,255,0.65)', lineHeight: 1.6, marginBottom: 20 }}>
-                {feature.desc}
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: feature.color, fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Découvrir <ArrowRight size={14} />
-              </div>
-            </Link>
-          ))}
         </div>
       </section>
 
