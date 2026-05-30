@@ -239,3 +239,16 @@ export async function getAdminTotalUnreadCount() {
   if (!rooms) return 0;
   return rooms.reduce((sum, r) => sum + (r.admin_unread_count || 0), 0);
 }
+
+// 8. Get all exercises list
+export async function getExercisesList() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('exercises')
+    .select('id, name, muscle_group, gif_url, instructions')
+    .order('name', { ascending: true });
+    
+  if (error) throw error;
+  return data || [];
+}
+
