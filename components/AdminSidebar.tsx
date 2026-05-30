@@ -231,7 +231,7 @@ export default function AdminSidebar() {
               <div style={{
                 position: 'absolute',
                 top: '100%',
-                right: 0,
+                right: '-120px',
                 background: 'rgba(7, 6, 26, 0.98)',
                 backdropFilter: 'blur(20px)',
                 border: '1px solid var(--miami-border)',
