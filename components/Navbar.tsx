@@ -126,7 +126,7 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
                 {exerciseCategories.map((item) => (
                   <Link
                     key={item.name}
-                    href={`/?muscle=${item.param}#exercises-library`}
+                    href={`/exercises?muscle=${item.param}`}
                     style={{
                       padding: '10px 20px',
                       fontSize: '0.85rem',
@@ -323,7 +323,7 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
               {exerciseCategories.map((item) => (
                 <Link
                   key={item.name}
-                  href={`/?muscle=${item.param}#exercises-library`}
+                  href={`/exercises?muscle=${item.param}`}
                   onClick={toggleMenu}
                   style={{
                     padding: '10px 16px',

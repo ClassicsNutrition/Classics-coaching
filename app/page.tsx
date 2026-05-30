@@ -217,7 +217,7 @@ export default async function HomePage() {
               title: 'Fiches d\'Exercices',
               desc: 'Maîtrisez l\'exécution de plus de 35 mouvements avec des démonstrations animées et des conseils d\'expert.',
               color: '#FFB000',
-              href: '#exercises-library',
+              href: '/exercises',
             },
             {
               icon: <Heart size={28} />,
