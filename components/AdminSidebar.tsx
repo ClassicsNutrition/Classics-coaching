@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, BookOpen, Dumbbell, TrendingUp, Settings, Menu, X, Home, Bell } from 'lucide-react';
+import { Users, BookOpen, Dumbbell, TrendingUp, Settings, Menu, X, Home, Bell, MessageSquare } from 'lucide-react';
 import { getPendingReservations, getPendingReservationsCount } from '@/app/admin/actions';
+import { getAdminTotalUnreadCount } from '@/app/chat/actions';
 
 export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const pathname = usePathname();
 
@@ -26,6 +28,10 @@ export default function AdminSidebar() {
       } else {
         setNotifications([]);
       }
+      
+      // Fetch unread chats count for admin
+      const unreadCount = await getAdminTotalUnreadCount();
+      setUnreadChatCount(unreadCount);
     } catch (err) {
       console.error("Error fetching notifications:", err);
     }
@@ -41,6 +47,7 @@ export default function AdminSidebar() {
   const menuItems = [
     { href: '/admin', label: 'Dashboard', icon: <TrendingUp size={18} /> },
     { href: '/admin/users', label: 'Utilisateurs', icon: <Users size={18} /> },
+    { href: '/admin/chat', label: 'Messagerie', icon: <MessageSquare size={18} /> },
     { href: '/admin/ebooks', label: 'E-books', icon: <BookOpen size={18} /> },
     { href: '/admin/programs', label: 'Programmes', icon: <Dumbbell size={18} /> },
     { href: '/admin/exercises', label: 'Exercices', icon: <Settings size={18} /> },
@@ -191,8 +198,6 @@ export default function AdminSidebar() {
         height: '100vh',
         overflowY: 'auto',
         background: 'rgba(6,6,15,0.95)',
-        zIndex: 1000,
-        transition: 'transform 0.3s ease'
       }}>
         {/* Logo and Notif Bell */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, padding: '0 8px', position: 'relative' }}>
@@ -204,7 +209,7 @@ export default function AdminSidebar() {
           </Link>
           
           {/* Notification Bell (Desktop) */}
-          <div style={{ position: 'relative' }} className="hide-mobile">
+          <div className="hide-mobile">
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               style={{
@@ -225,97 +230,98 @@ export default function AdminSidebar() {
                 <span className="notif-badge">{pendingCount}</span>
               )}
             </button>
-            
-            {/* Dropdown Desktop */}
-            {isNotifOpen && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: '-120px',
-                background: 'rgba(7, 6, 26, 0.98)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid var(--miami-border)',
-                borderRadius: 14,
-                padding: '12px 0',
-                minWidth: 280,
-                boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 10, 94, 0.12)',
-                zIndex: 1100,
-                marginTop: 8,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4
-              }}>
-                <div style={{ padding: '4px 16px 8px', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>DEMANDES EN ATTENTE</span>
-                  {pendingCount > 0 && <span style={{ color: 'var(--miami-pink)', fontWeight: 'bold' }}>{pendingCount}</span>}
-                </div>
-                
-                {notifications.length === 0 ? (
-                  <div style={{ padding: '20px 16px', color: 'rgba(226,232,240,0.4)', fontSize: '0.85rem', textAlign: 'center' }}>
-                    Aucune demande d'accès en attente.
-                  </div>
-                ) : (
-                  <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                    {notifications.slice(0, 5).map((notif) => (
-                      <Link 
-                        key={notif.id}
-                        href="/admin/users?tab=requests"
-                        onClick={() => {
-                          setIsNotifOpen(false);
-                          setIsOpen(false);
-                        }}
-                        style={{
-                          padding: '10px 16px',
-                          textDecoration: 'none',
-                          color: 'white',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 2,
-                          borderBottom: '1px solid rgba(255,255,255,0.02)',
-                          fontSize: '0.8rem',
-                          textAlign: 'left'
-                        }}
-                        className="notif-item"
-                      >
-                        <span style={{ fontWeight: 'bold' }}>{notif.user_name}</span>
-                        <span style={{ color: 'rgba(226,232,240,0.6)' }}>a demandé l'accès à <span style={{ color: 'var(--miami-cyan)' }}>{notif.content_title}</span></span>
-                        <span style={{ fontSize: '0.7rem', color: 'rgba(226,232,240,0.3)', marginTop: 2 }}>
-                          {new Date(notif.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-                
-                <Link 
-                  href="/admin/users?tab=requests"
-                  onClick={() => {
-                    setIsNotifOpen(false);
-                    setIsOpen(false);
-                  }}
-                  style={{
-                    padding: '8px 16px 4px',
-                    fontSize: '0.8rem',
-                    color: 'var(--miami-pink)',
-                    textDecoration: 'none',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    borderTop: '1px solid rgba(255,255,255,0.05)',
-                    marginTop: 4,
-                    display: 'block'
-                  }}
-                >
-                  Voir toutes les demandes
-                </Link>
-              </div>
-            )}
           </div>
+          
+          {/* Dropdown Desktop (Relative to the Header row so it fits inside the sidebar width) */}
+          {isNotifOpen && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 8,
+              right: 8,
+              background: 'rgba(7, 6, 26, 0.98)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid var(--miami-border)',
+              borderRadius: 14,
+              padding: '12px 0',
+              boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 10, 94, 0.12)',
+              zIndex: 1100,
+              marginTop: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }} className="hide-mobile">
+              <div style={{ padding: '4px 16px 8px', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>DEMANDES EN ATTENTE</span>
+                {pendingCount > 0 && <span style={{ color: 'var(--miami-pink)', fontWeight: 'bold' }}>{pendingCount}</span>}
+              </div>
+              
+              {notifications.length === 0 ? (
+                <div style={{ padding: '20px 16px', color: 'rgba(226,232,240,0.4)', fontSize: '0.85rem', textAlign: 'center' }}>
+                  Aucune demande d'accès en attente.
+                </div>
+              ) : (
+                <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                  {notifications.slice(0, 5).map((notif) => (
+                    <Link 
+                      key={notif.id}
+                      href="/admin/users?tab=requests"
+                      onClick={() => {
+                        setIsNotifOpen(false);
+                        setIsOpen(false);
+                      }}
+                      style={{
+                        padding: '10px 16px',
+                        textDecoration: 'none',
+                        color: 'white',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        borderBottom: '1px solid rgba(255,255,255,0.02)',
+                        fontSize: '0.8rem',
+                        textAlign: 'left'
+                      }}
+                      className="notif-item"
+                    >
+                      <span style={{ fontWeight: 'bold' }}>{notif.user_name}</span>
+                      <span style={{ color: 'rgba(226,232,240,0.6)' }}>a demandé l'accès à <span style={{ color: 'var(--miami-cyan)' }}>{notif.content_title}</span></span>
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(226,232,240,0.3)', marginTop: 2 }}>
+                        {new Date(notif.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+              
+              <Link 
+                href="/admin/users?tab=requests"
+                onClick={() => {
+                  setIsNotifOpen(false);
+                  setIsOpen(false);
+                }}
+                style={{
+                  padding: '8px 16px 4px',
+                  fontSize: '0.8rem',
+                  color: 'var(--miami-pink)',
+                  textDecoration: 'none',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  borderTop: '1px solid rgba(255,255,255,0.05)',
+                  marginTop: 4,
+                  display: 'block'
+                }}
+              >
+                Voir toutes les demandes
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Menu Navigation items */}
         {menuItems.map(item => {
           const isActive = pathname === item.href;
           const isUsers = item.href === '/admin/users';
+          const isChat = item.href === '/admin/chat';
           
           return (
             <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} style={{
@@ -340,6 +346,11 @@ export default function AdminSidebar() {
               {/* Show glowing badge in sidebar next to Users if there are pending requests */}
               {isUsers && pendingCount > 0 && (
                 <span className="notif-badge-inline">{pendingCount}</span>
+              )}
+
+              {/* Show unread chat count next to Messagerie */}
+              {isChat && unreadChatCount > 0 && (
+                <span className="notif-badge-inline" style={{ background: 'var(--miami-cyan)', boxShadow: '0 0 6px var(--miami-cyan)' }}>{unreadChatCount}</span>
               )}
             </Link>
           );

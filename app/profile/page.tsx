@@ -2,10 +2,11 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 export const revalidate = 0;
 import { createClient } from '@/lib/supabase/server';
-import { LogOut, BookOpen, Dumbbell, User, Clock, Heart } from 'lucide-react';
+import { LogOut, BookOpen, Dumbbell, User, Clock, Heart, MessageSquare } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProfileFavoritesList from '@/components/ProfileFavoritesList';
 import ProfileAvatarEditor from '@/components/ProfileAvatarEditor';
+import ProfileChat from '@/components/ProfileChat';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -54,6 +55,14 @@ export default async function ProfilePage() {
 
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'Client';
   const joinDate = new Date(user.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  
+  // Get chat room for user to check unread messages
+  const { data: chatRoom } = await supabase
+    .from('chat_rooms')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  const unreadMessagesCount = chatRoom?.user_unread_count || 0;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--miami-night)' }}>
@@ -98,6 +107,34 @@ export default async function ProfilePage() {
             ))}
           </div>
         </div>
+
+        {/* Client Notification Center (Banner for new chat messages) */}
+        {unreadMessagesCount > 0 && (
+          <div className="card-glass animate-fadeInUp" style={{
+            padding: '16px 24px',
+            marginBottom: 32,
+            border: '1px solid var(--miami-pink)',
+            background: 'rgba(255, 45, 120, 0.05)',
+            boxShadow: '0 0 15px rgba(255, 45, 120, 0.1)',
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: '1.5rem' }}>💬</span>
+              <div>
+                <div style={{ color: 'white', fontWeight: 700, fontSize: '0.9rem' }}>Nouveau message de votre coach !</div>
+                <div style={{ color: 'rgba(226,232,240,0.6)', fontSize: '0.8rem' }}>Vous avez {unreadMessagesCount} nouveau(x) message(s) de Classics Coaching.</div>
+              </div>
+            </div>
+            <a href="#messagerie-coach" className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.8rem', textDecoration: 'none' }}>
+              Répondre
+            </a>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
           {/* E-books */}
@@ -183,6 +220,18 @@ export default async function ProfilePage() {
           </div>
 
           <ProfileFavoritesList initialExercises={favoriteExercises} userId={user.id} />
+        </div>
+
+        {/* Messagerie avec le Coach */}
+        <div id="messagerie-coach" className="card-glass animate-fadeInUp animate-delay-300" style={{ padding: 'clamp(24px, 4vw, 32px)', marginTop: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(0, 245, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-cyan)' }}>
+              <MessageSquare size={20} />
+            </div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: 'white' }}>Messagerie avec le Coach</h2>
+          </div>
+          
+          <ProfileChat />
         </div>
 
         {/* Admin link */}

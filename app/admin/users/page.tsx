@@ -2,10 +2,11 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Users, Search, Shield, Trash2, Ban, 
   CheckCircle2, XCircle, Clock, RefreshCw,
-  Check, X, BookOpen, Dumbbell
+  Check, X, BookOpen, Dumbbell, MessageSquare
 } from 'lucide-react';
 import { 
   getAdminUsersList, banUser, unbanUser, 
@@ -258,6 +259,15 @@ function UsersPageContent() {
                       </td>
                       <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                          <Link 
+                            href={`/admin/chat?userId=${u.id}`}
+                            className="btn-ghost" 
+                            title="Ouvrir la messagerie"
+                            style={{ padding: 8, color: 'var(--miami-cyan)', display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            <MessageSquare size={16} />
+                          </Link>
+
                           <button 
                             onClick={() => handleUserAction(() => toggleAdminRole(u.id, u.role), u.id)}
                             className="btn-ghost" 

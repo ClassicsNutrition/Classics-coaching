@@ -174,3 +174,66 @@ CREATE POLICY "Users can create favorites" ON favorite_exercises FOR INSERT WITH
 CREATE POLICY "Users can delete own favorites" ON favorite_exercises FOR DELETE USING (auth.uid() = user_id);
 CREATE POLICY "Admins manage all favorites" ON favorite_exercises FOR ALL USING (public.is_admin());
 
+-- ============================================================
+-- 9. MESSAGERIE (CHAT ADMIN / CLIENT)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS chat_rooms (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
+  admin_unread_count INT NOT NULL DEFAULT 0,
+  user_unread_count INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id UUID NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable triggers to update updated_at on chat_rooms
+DROP TRIGGER IF EXISTS chat_rooms_updated_at ON chat_rooms;
+CREATE TRIGGER chat_rooms_updated_at BEFORE UPDATE ON chat_rooms FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
+-- Enable RLS
+ALTER TABLE chat_rooms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- Policies for chat_rooms
+CREATE POLICY "Users can view their own chat room" 
+  ON chat_rooms FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can manage all chat rooms" 
+  ON chat_rooms FOR ALL 
+  USING (public.is_admin());
+
+-- Policies for chat_messages
+CREATE POLICY "Users can view messages in their own chat room" 
+  ON chat_messages FOR SELECT 
+  USING (EXISTS (
+    SELECT 1 FROM chat_rooms 
+    WHERE chat_rooms.id = chat_messages.room_id 
+    AND chat_rooms.user_id = auth.uid()
+  ));
+
+CREATE POLICY "Users can insert messages in their own chat room" 
+  ON chat_messages FOR INSERT 
+  WITH CHECK (
+    auth.uid() = sender_id 
+    AND EXISTS (
+      SELECT 1 FROM chat_rooms 
+      WHERE chat_rooms.id = chat_messages.room_id 
+      AND chat_rooms.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Admins can manage all messages" 
+  ON chat_messages FOR ALL 
+  USING (public.is_admin());
+
+

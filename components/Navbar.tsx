@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, User, LogOut, BookOpen, Dumbbell, ShieldCheck, ChevronDown, ShoppingBag } from 'lucide-react';
+import { getClientChatRoom } from '@/app/chat/actions';
 
 interface NavbarProps {
   user: any;
@@ -15,6 +16,7 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
   const [isMobileExercisesOpen, setIsMobileExercisesOpen] = useState(false);
   const [isFoodDropdownOpen, setIsFoodDropdownOpen] = useState(false);
   const [isMobileFoodOpen, setIsMobileFoodOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -23,6 +25,30 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
       setIsMobileFoodOpen(false);
     }
   };
+
+  useEffect(() => {
+    if (!user) {
+      setHasUnread(false);
+      return;
+    }
+    
+    const checkUnread = async () => {
+      try {
+        const room = await getClientChatRoom();
+        if (room && room.user_unread_count > 0) {
+          setHasUnread(true);
+        } else {
+          setHasUnread(false);
+        }
+      } catch (err) {
+        console.error("Error checking user unread chat:", err);
+      }
+    };
+    
+    checkUnread();
+    const interval = setInterval(checkUnread, 15000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const exerciseCategories = [
     { name: 'Pectoraux (Pecs)', param: 'Pectoraux', icon: '💪' },
@@ -248,8 +274,21 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
           
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Link href="/profile" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <Link href="/profile" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px', textTransform: 'uppercase', letterSpacing: '0.05em', position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 <User size={16} /> Mon Espace
+                {hasUnread && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    width: 10,
+                    height: 10,
+                    borderRadius: '50%',
+                    background: '#FF2D78',
+                    boxShadow: '0 0 6px #FF2D78',
+                    animation: 'pulse 2s infinite'
+                  }} />
+                )}
               </Link>
               <form action="/auth/signout" method="post">
                 <button type="submit" className="btn-ghost" style={{ padding: '8px', borderRadius: '10px', color: 'rgba(226,232,240,0.5)' }} title="Déconnexion">
@@ -416,8 +455,21 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {user ? (
             <>
-              <Link href="/profile" onClick={toggleMenu} className="btn-primary" style={{ justifyContent: 'center' }}>
+              <Link href="/profile" onClick={toggleMenu} className="btn-primary" style={{ justifyContent: 'center', position: 'relative', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <User size={18} /> Mon Profil
+                {hasUnread && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    width: 10,
+                    height: 10,
+                    borderRadius: '50%',
+                    background: '#FF2D78',
+                    boxShadow: '0 0 6px #FF2D78',
+                    animation: 'pulse 2s infinite'
+                  }} />
+                )}
               </Link>
               <form action="/auth/signout" method="post" style={{ width: '100%' }}>
                 <button type="submit" className="btn-ghost" style={{ width: '100%', justifyContent: 'center' }}>
