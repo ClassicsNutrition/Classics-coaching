@@ -15,7 +15,7 @@ export default async function ProgramsPage() {
 
   const { data: programs } = await supabase
     .from('programs')
-    .select('id, slug, title, description, cover_url, theme_primary, theme_accent')
+    .select('id, slug, title, description, cover_url')
     .eq('published', true)
     .order('created_at', { ascending: false });
 
@@ -69,7 +69,7 @@ export default async function ProgramsPage() {
             {programs.map((program) => {
               const isGranted = grantedIds.includes(program.id);
               const isPending = pendingIds.includes(program.id);
-              const primary = program.theme_primary || '#00F5FF';
+              const primary = '#00F5FF';
 
               return (
                 <div key={program.id} className="card-glass card-glass-hover" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
