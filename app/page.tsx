@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { BookOpen, Dumbbell, Star, ArrowRight, Zap, Heart, ShoppingBag, ChevronRight } from 'lucide-react';
+import { BookOpen, Dumbbell, Star, ArrowRight, Zap, Heart, ShoppingBag, ChevronRight, Apple, Sparkles } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import HomeLibrary from '@/components/HomeLibrary';
 import { Suspense } from 'react';
@@ -83,11 +83,7 @@ export default async function HomePage() {
         }} />
 
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <div className="badge badge-pink animate-fadeInUp" style={{ marginBottom: 24, display: 'inline-flex', letterSpacing: '0.1em' }}>
-            <Zap size={12} /> COACHING PREMIUM
-          </div>
-
-          <h1 className="animate-fadeInUp animate-delay-100" style={{
+          <h1 className="animate-fadeInUp" style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(3.5rem, 8vw, 6.5rem)',
             fontWeight: 'normal',
@@ -101,23 +97,23 @@ export default async function HomePage() {
             <span className="gradient-miami-text" style={{ filter: 'drop-shadow(0 0 15px rgba(189,0,255,0.2))' }}>corps & votre esprit</span>
           </h1>
 
-          <p className="animate-fadeInUp animate-delay-200" style={{
+          <p className="animate-fadeInUp animate-delay-100" style={{
             fontSize: 'clamp(1rem, 2vw, 1.3rem)',
             color: 'rgba(245,240,255,0.7)',
             maxWidth: 650,
             margin: '0 auto 40px',
             lineHeight: 1.7,
           }}>
-            La plateforme de bien-être de <strong style={{ color: 'var(--miami-cyan)', textShadow: '0 0 10px rgba(0,245,255,0.3)' }}>Smain Chebab</strong>, fondateur de Classics Nutrition. Programmes personnalisés, e-books experts et compléments alimentaires professionnels.
+            La plateforme de bien-être & nutrition de <strong style={{ color: 'var(--miami-cyan)', textShadow: '0 0 10px rgba(0,245,255,0.3)' }}>Smain Chebab</strong>. Des programmes d&#39;entraînement ciblés, un guide alimentaire de santé et une boutique de compléments intégrée.
           </p>
 
-          <div className="animate-fadeInUp animate-delay-300" style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <Link href="/ebooks" className="btn-primary" style={{ fontSize: '1rem', padding: '14px 32px', letterSpacing: '0.05em' }}>
-              <BookOpen size={18} /> Découvrir les E-books
+          <div className="animate-fadeInUp animate-delay-200" style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <Link href="/programs" className="btn-primary" style={{ fontSize: '1rem', padding: '14px 32px', letterSpacing: '0.05em' }}>
+              <Dumbbell size={18} /> Nos Programmes
             </Link>
-            <a href="https://classicsnutrition.com" target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ fontSize: '1rem', padding: '14px 32px', letterSpacing: '0.05em' }}>
-              <ShoppingBag size={18} /> Boutique Nutrition
-            </a>
+            <Link href="/shop" className="btn-secondary" style={{ fontSize: '1rem', padding: '14px 32px', letterSpacing: '0.05em' }}>
+              <ShoppingBag size={18} /> Boutique Compléments
+            </Link>
           </div>
 
           {/* Stats Section with Neon Cards */}
@@ -186,34 +182,48 @@ export default async function HomePage() {
           </h2>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
           {[
-            {
-              icon: <BookOpen size={28} />,
-              title: 'E-books Experts',
-              desc: 'Des guides numériques interactifs créés par Smain Chebab, couvrant nutrition, musculation et bien-être.',
-              color: 'var(--miami-pink)',
-              href: '/ebooks',
-            },
             {
               icon: <Dumbbell size={28} />,
               title: 'Programmes Sportifs',
-              desc: 'Des plans d\'entraînement structurés et personnalisés selon vos objectifs et votre niveau.',
+              desc: 'Des plans d\'entraînement structurés (Prise de masse, Perte de poids, Force, Sèche) pour guider vos séances.',
               color: 'var(--miami-cyan)',
               href: '/programs',
             },
             {
+              icon: <Apple size={28} />,
+              title: 'Nutrition & Aliments',
+              desc: 'Accédez à notre encyclopédie d\'aliments sains et découvrez en détail leurs bienfaits pour structurer vos repas.',
+              color: '#00FF66',
+              href: '/alimentation',
+            },
+            {
               icon: <ShoppingBag size={28} />,
-              title: 'Compléments Alimentaires',
-              desc: 'Retrouvez les meilleurs compléments recommandés directement sur classicsnutrition.com.',
+              title: 'Compléments Premium',
+              desc: 'Commandez vos suppléments professionnels (Whey Native, Pre-workout, EAA) directement sur notre boutique intégrée.',
+              color: 'var(--miami-pink)',
+              href: '/shop',
+            },
+            {
+              icon: <BookOpen size={28} />,
+              title: 'E-books de Référence',
+              desc: 'Des guides théoriques et pratiques complets rédigés par Smain Chebab pour maîtriser les bases du fitness.',
               color: 'var(--miami-purple-light)',
-              href: 'https://classicsnutrition.com',
+              href: '/ebooks',
+            },
+            {
+              icon: <Sparkles size={28} />,
+              title: 'Fiches d\'Exercices',
+              desc: 'Maîtrisez l\'exécution de plus de 35 mouvements avec des démonstrations animées et des conseils d\'expert.',
+              color: '#FFB000',
+              href: '#exercises-library',
             },
             {
               icon: <Heart size={28} />,
-              title: 'Suivi Personnalisé',
-              desc: 'Un espace client dédié pour accéder à vos programmes, suivre vos progrès et rester motivé.',
-              color: '#facc15',
+              title: 'Suivi & Favoris',
+              desc: 'Enregistrez vos exercices favoris et suivez votre progression en vous connectant à votre espace membre.',
+              color: '#00E5FF',
               href: user ? '/profile' : '/register',
             },
           ].map((feature) => (
@@ -270,7 +280,7 @@ export default async function HomePage() {
                 {feature.desc}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: feature.color, fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                En savoir plus <ArrowRight size={14} />
+                Découvrir <ArrowRight size={14} />
               </div>
             </Link>
           ))}
@@ -356,9 +366,9 @@ export default async function HomePage() {
                   <Link href={user ? '/profile' : '/register'} className="btn-primary" style={{ letterSpacing: '0.05em' }}>
                     {user ? 'Mon Espace Client' : 'Commencer Gratuitement'} <ChevronRight size={16} />
                   </Link>
-                  <a href="https://classicsnutrition.com" target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ letterSpacing: '0.05em' }}>
+                  <Link href="/shop" className="btn-ghost" style={{ letterSpacing: '0.05em' }}>
                     Visiter la Boutique
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -399,60 +409,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Partner Link Banner */}
-      <section style={{ padding: '40px 24px 80px' }}>
-        <div className="container-responsive" style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <a href="https://classicsnutrition.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-            <div className="gradient-miami hover-lift" style={{
-              borderRadius: 20, 
-              padding: '40px 32px',
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              textAlign: 'left',
-              gap: 24,
-              boxShadow: '0 20px 60px rgba(255,10,94,0.3)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-            >
-              {/* Shiny effect overlay */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%)',
-                transform: 'skewX(-25deg)',
-              }} />
 
-              <div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.9)', marginBottom: 8 }}>
-                  PARTENAIRE OFFICIEL
-                </div>
-                <h3 style={{ 
-                  fontFamily: 'var(--font-display)', 
-                  fontSize: '2.5rem', 
-                  fontWeight: 'normal', 
-                  letterSpacing: '0.04em',
-                  color: 'white', 
-                  marginBottom: 8 
-                }}>
-                  Classicsnutrition.com
-                </h3>
-                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.05rem' }}>
-                  Compléments alimentaires professionnels recommandés par Smain Chebab
-                </p>
-              </div>
-              <div className="btn-ghost" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', borderColor: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                <ShoppingBag size={16} /> Voir la boutique <ArrowRight size={16} />
-              </div>
-            </div>
-          </a>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer style={{
@@ -480,15 +437,13 @@ export default async function HomePage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ letterSpacing: '0.05em' }}>© 2024 Classics Coaching — Smain Chebab. Tous droits réservés.</p>
           <p style={{ marginTop: 12 }}>
-            En partenariat avec{' '}
-            <a 
-              href="https://classicsnutrition.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            Découvrez notre boutique intégrée de{' '}
+            <Link 
+              href="/shop" 
               className="partner-link"
             >
-              Classics Nutrition
-            </a>
+              Compléments Alimentaires
+            </Link>
           </p>
         </div>
       </footer>
