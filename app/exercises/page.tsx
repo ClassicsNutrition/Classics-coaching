@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ChevronLeft, Zap } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ExercisesLibrary from '@/components/ExercisesLibrary';
+import Footer from '@/components/Footer';
 import { Suspense } from 'react';
 
 export default async function ExercisesPage() {
@@ -62,6 +63,7 @@ export default async function ExercisesPage() {
           />
         </Suspense>
       </div>
+      <Footer />
     </div>
   );
 }

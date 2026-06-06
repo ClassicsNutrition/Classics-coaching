@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ChevronLeft, Zap } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import AlimentationLibrary from '@/components/AlimentationLibrary';
+import Footer from '@/components/Footer';
 import { Suspense } from 'react';
 
 export default async function AlimentationPage() {
@@ -40,6 +41,7 @@ export default async function AlimentationPage() {
           <AlimentationLibrary user={user} isAdmin={isAdmin} />
         </Suspense>
       </div>
+      <Footer />
     </div>
   );
 }

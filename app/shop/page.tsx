@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ChevronLeft, ShoppingBag } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ShopLibrary from '@/components/ShopLibrary';
+import Footer from '@/components/Footer';
 import { Suspense } from 'react';
 
 export default async function ShopPage() {
@@ -40,6 +41,7 @@ export default async function ShopPage() {
           <ShopLibrary user={user} isAdmin={isAdmin} />
         </Suspense>
       </div>
+      <Footer />
     </div>
   );
 }

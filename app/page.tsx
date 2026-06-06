@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { BookOpen, Dumbbell, Star, ArrowRight, Zap, Heart, ShoppingBag, ChevronRight, Apple, Sparkles } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import HomeLibrary from '@/components/HomeLibrary';
+import Footer from '@/components/Footer';
 import { Suspense } from 'react';
 
 export default async function HomePage() {
@@ -413,42 +414,7 @@ export default async function HomePage() {
 
 
 
-      {/* Footer */}
-      <footer style={{
-        borderTop: '1px solid var(--miami-border)',
-        padding: '60px 24px',
-        textAlign: 'center',
-        color: 'rgba(245,240,255,0.4)',
-        fontSize: '0.9rem',
-        position: 'relative',
-        overflow: 'hidden',
-        background: 'linear-gradient(180deg, var(--miami-night) 0%, #040310 100%)'
-      }}>
-        {/* Palm tree SVG silhouettes left/right in footer */}
-        <div style={{ position: 'absolute', bottom: -20, left: 10, width: 140, height: 'auto', opacity: 0.08, pointerEvents: 'none', transform: 'scaleX(-1)' }}>
-          <svg viewBox="0 0 100 100" fill="currentColor" style={{ color: 'var(--miami-pink)' }}>
-            <path d="M10,100 Q15,60 35,45 Q40,42 45,43 Q43,35 30,30 Q20,26 10,32 Q25,24 45,35 Q48,37 49,42 Q49,30 40,20 Q30,10 15,12 Q30,8 46,24 Q48,26 49,30 Q51,18 48,8 Q44,0 30,0 Q43,-2 52,12 Q53,14 53,18 Q57,10 65,4 Q75,-2 90,0 Q75,3 64,14 Q62,16 61,20 Q67,13 78,10 Q90,7 100,15 Q86,13 71,20 Q69,21 67,25 Q75,22 86,22 Q98,22 105,32 Q92,28 75,28 Q71,28 67,31 Q72,34 78,40 Q85,48 90,60 Q82,50 72,43 Q68,40 64,41 Q62,45 61,50 Q56,70 50,100 Z" />
-          </svg>
-        </div>
-        <div style={{ position: 'absolute', bottom: -20, right: 10, width: 140, height: 'auto', opacity: 0.08, pointerEvents: 'none' }}>
-          <svg viewBox="0 0 100 100" fill="currentColor" style={{ color: 'var(--miami-cyan)' }}>
-            <path d="M10,100 Q15,60 35,45 Q40,42 45,43 Q43,35 30,30 Q20,26 10,32 Q25,24 45,35 Q48,37 49,42 Q49,30 40,20 Q30,10 15,12 Q30,8 46,24 Q48,26 49,30 Q51,18 48,8 Q44,0 30,0 Q43,-2 52,12 Q53,14 53,18 Q57,10 65,4 Q75,-2 90,0 Q75,3 64,14 Q62,16 61,20 Q67,13 78,10 Q90,7 100,15 Q86,13 71,20 Q69,21 67,25 Q75,22 86,22 Q98,22 105,32 Q92,28 75,28 Q71,28 67,31 Q72,34 78,40 Q85,48 90,60 Q82,50 72,43 Q68,40 64,41 Q62,45 61,50 Q56,70 50,100 Z" />
-          </svg>
-        </div>
-
-        <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <p style={{ letterSpacing: '0.05em' }}>© 2024 Classics Coaching — Smain Chebab. Tous droits réservés.</p>
-          <p style={{ marginTop: 12 }}>
-            Découvrez notre boutique intégrée de{' '}
-            <Link 
-              href="/shop" 
-              className="partner-link"
-            >
-              Compléments Alimentaires
-            </Link>
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

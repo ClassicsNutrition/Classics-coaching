@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { BookOpen, Lock, ArrowRight, ChevronLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 export default async function EbooksPage() {
   const supabase = await createClient();
@@ -115,6 +116,7 @@ export default async function EbooksPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
