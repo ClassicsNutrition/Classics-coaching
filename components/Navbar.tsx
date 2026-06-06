@@ -8,7 +8,8 @@ import {
   getUserNotifications, 
   markNotificationAsRead, 
   markAllNotificationsAsRead, 
-  deleteNotification 
+  deleteNotification,
+  savePushSubscription
 } from '@/app/notifications/actions';
 
 interface NavbarProps {
@@ -34,6 +35,83 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
   const notifDropdownRefMobile = useRef<HTMLDivElement>(null);
   const shownNotifIdsRef = useRef<Set<string>>(new Set());
   const isFirstFetchRef = useRef(true);
+  const [pushPermission, setPushPermission] = useState<string>('default');
+
+  // Convert VAPID public key from base64 to Uint8Array
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setPushPermission(Notification.permission);
+    }
+  }, []);
+
+  // Auto-sync Web Push subscription if permission already granted
+  useEffect(() => {
+    if (user && typeof window !== 'undefined' && 'serviceWorker' in navigator && Notification.permission === 'granted') {
+      navigator.serviceWorker.ready.then(async (reg) => {
+        try {
+          const subscription = await reg.pushManager.getSubscription();
+          if (subscription) {
+            await savePushSubscription(subscription.toJSON());
+            console.log("Auto-synced Web Push subscription for logged in user.");
+          }
+        } catch (e) {
+          console.error("Error auto-syncing push subscription:", e);
+        }
+      });
+    }
+  }, [user]);
+
+  const requestPushPermission = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    try {
+      const permission = await Notification.requestPermission();
+      setPushPermission(permission);
+      if (permission === 'granted' && 'serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+
+        const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (vapidPublicKey) {
+          try {
+            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+            const subscription = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: convertedVapidKey
+            });
+            
+            await savePushSubscription(subscription.toJSON());
+            console.log("Device subscribed to Web Push successfully.");
+          } catch (pushErr) {
+            console.error("Failed to subscribe to Web Push service:", pushErr);
+          }
+        } else {
+          console.warn("VAPID public key not found in environment.");
+        }
+
+        reg.showNotification("Classics Coaching ⚡", {
+          body: "Notifications activées sur cet appareil ! 💪",
+          icon: '/icon.png',
+          badge: '/icon.png'
+        });
+      }
+    } catch (err) {
+      console.error("Error requesting permission:", err);
+    }
+  };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -424,8 +502,29 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
                     gap: 4,
                     marginTop: 10
                   }}>
-                    <div style={{ padding: '4px 16px 8px', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>NOTIFICATIONS</span>
+                    <div style={{ padding: '4px 16px 8px', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>NOTIFICATIONS</span>
+                        {pushPermission !== 'granted' && (
+                          <button
+                            type="button"
+                            onClick={requestPushPermission}
+                            style={{
+                              background: 'rgba(255, 45, 120, 0.1)',
+                              border: '1px solid rgba(255, 45, 120, 0.25)',
+                              color: 'var(--miami-pink)',
+                              cursor: 'pointer',
+                              fontSize: '0.65rem',
+                              fontWeight: 'bold',
+                              padding: '2px 8px',
+                              borderRadius: 6,
+                            }}
+                            title="Activer les notifications push sur cet appareil"
+                          >
+                            🔔 Activer Push
+                          </button>
+                        )}
+                      </div>
                       {unreadNotifCount > 0 && (
                         <button
                           type="button"
@@ -630,8 +729,29 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
                   gap: 4,
                   marginTop: 10
                 }}>
-                  <div style={{ padding: '4px 16px 8px', fontSize: '0.72rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>NOTIFICATIONS</span>
+                  <div style={{ padding: '4px 16px 8px', fontSize: '0.72rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>NOTIFICATIONS</span>
+                      {pushPermission !== 'granted' && (
+                        <button
+                          type="button"
+                          onClick={requestPushPermission}
+                          style={{
+                            background: 'rgba(255, 45, 120, 0.1)',
+                            border: '1px solid rgba(255, 45, 120, 0.25)',
+                            color: 'var(--miami-pink)',
+                            cursor: 'pointer',
+                            fontSize: '0.62rem',
+                            fontWeight: 'bold',
+                            padding: '2px 6px',
+                            borderRadius: 5,
+                          }}
+                          title="Activer les notifications push sur cet appareil"
+                        >
+                          🔔 Activer Push
+                        </button>
+                      )}
+                    </div>
                     {unreadNotifCount > 0 && (
                       <button
                         type="button"

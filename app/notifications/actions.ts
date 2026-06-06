@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { sendPushToUser } from '@/lib/webpush';
 
 // Helper to check if current user is admin
 async function isAdminUser() {
@@ -127,6 +128,13 @@ export async function createAdminNotification(title: string, body: string, targe
 
   if (insertErr) throw insertErr;
 
+  // Send real Web Push notifications asynchronously
+  recipientIds.forEach(uid => {
+    sendPushToUser(uid, title, body, '/profile').catch(err => {
+      console.error("Failed to send background web push to user:", uid, err);
+    });
+  });
+
   return { success: true, count: recipientIds.length };
 }
 
@@ -170,3 +178,59 @@ export async function getAdminSentNotifications() {
   if (error) throw error;
   return data || [];
 }
+
+// 8. Save Web Push Subscription
+export async function savePushSubscription(subscription: any) {
+  const supabase = await createClient();
+  const { data: { user }, error: uError } = await supabase.auth.getUser();
+  if (uError || !user) throw new Error("Non connecté.");
+
+  const { endpoint, keys } = subscription;
+  if (!endpoint || !keys) {
+    throw new Error("Souscription invalide.");
+  }
+
+  const adminSupabase = await createAdminClient();
+  const { error } = await adminSupabase
+    .from('push_subscriptions')
+    .upsert({
+      user_id: user.id,
+      endpoint,
+      keys
+    }, { onConflict: 'endpoint' });
+
+  if (error) {
+    console.error("Error saving push subscription:", error);
+    if (error.code === '42P01') {
+      throw new Error("La table 'push_subscriptions' n'existe pas en base de données. Veuillez exécuter le script SQL de migration (à la fin de supabase/migration.sql) dans l'éditeur SQL de votre console Supabase.");
+    }
+    throw error;
+  }
+
+  return { success: true };
+}
+
+// 9. Delete Web Push Subscription
+export async function deletePushSubscription(endpoint: string) {
+  const supabase = await createClient();
+  const { data: { user }, error: uError } = await supabase.auth.getUser();
+  if (uError || !user) throw new Error("Non connecté.");
+
+  const adminSupabase = await createAdminClient();
+  const { error } = await adminSupabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('endpoint', endpoint)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error("Error deleting push subscription:", error);
+    if (error.code === '42P01') {
+      throw new Error("La table 'push_subscriptions' n'existe pas en base de données. Veuillez exécuter le script SQL de migration dans votre console Supabase.");
+    }
+    throw error;
+  }
+
+  return { success: true };
+}
+

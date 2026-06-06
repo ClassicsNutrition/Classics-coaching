@@ -271,5 +271,25 @@ CREATE POLICY "Admins can manage all notifications"
   ON user_notifications FOR ALL 
   USING (public.is_admin());
 
+-- ============================================================
+-- 11. PUSH SUBSCRIPTIONS (Web Push device tokens)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL UNIQUE,
+  keys JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
 
+-- Enable RLS
+ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
 
+-- Policies for push_subscriptions
+CREATE POLICY "Users can manage their own subscriptions" 
+  ON push_subscriptions FOR ALL 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all subscriptions" 
+  ON push_subscriptions FOR SELECT 
+  USING (public.is_admin());

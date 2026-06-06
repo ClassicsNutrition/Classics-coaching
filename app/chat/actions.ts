@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { sendPushToUser } from '@/lib/webpush';
 
 // Helper to check if current user is admin
 async function isAdminUser() {
@@ -103,7 +104,14 @@ export async function sendChatMessage(roomId: string, message: string) {
         link: '/profile'
       });
       
-    if (notifError) console.error("Error creating chat notification for client:", notifError);
+    if (notifError) {
+      console.error("Error creating chat notification for client:", notifError);
+    } else {
+      // Send real Web Push notification asynchronously
+      sendPushToUser(room.user_id, "Message de votre coach", truncatedBody, "/profile").catch(err => {
+        console.error("Failed to send background chat push notification to client:", err);
+      });
+    }
   } else {
     // Client sent it -> increment admin's unread count
     updates.admin_unread_count = (room.admin_unread_count || 0) + 1;
