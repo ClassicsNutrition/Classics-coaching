@@ -236,4 +236,40 @@ CREATE POLICY "Admins can manage all messages"
   ON chat_messages FOR ALL 
   USING (public.is_admin());
 
+-- ============================================================
+-- 10. USER NOTIFICATIONS
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS user_notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  is_read BOOLEAN NOT NULL DEFAULT false,
+  type TEXT DEFAULT 'general',
+  link TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE user_notifications ENABLE ROW LEVEL SECURITY;
+
+-- Policies for user_notifications
+CREATE POLICY "Users can view their own notifications" 
+  ON user_notifications FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own notifications" 
+  ON user_notifications FOR UPDATE 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own notifications" 
+  ON user_notifications FOR DELETE 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can manage all notifications" 
+  ON user_notifications FOR ALL 
+  USING (public.is_admin());
+
+
 

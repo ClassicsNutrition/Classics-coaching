@@ -87,6 +87,23 @@ export async function sendChatMessage(roomId: string, message: string) {
   if (isAdmin) {
     // Admin sent it -> increment user's unread count
     updates.user_unread_count = (room.user_unread_count || 0) + 1;
+
+    // Create a client notification
+    const truncatedBody = message.startsWith('[EXERCISE:') 
+      ? "Votre coach vous a partagé un exercice technique." 
+      : message.length > 50 ? message.substring(0, 50) + "..." : message;
+
+    const { error: notifError } = await adminSupabase
+      .from('user_notifications')
+      .insert({
+        user_id: room.user_id,
+        title: "Message de votre coach",
+        body: truncatedBody,
+        type: 'chat',
+        link: '/profile'
+      });
+      
+    if (notifError) console.error("Error creating chat notification for client:", notifError);
   } else {
     // Client sent it -> increment admin's unread count
     updates.admin_unread_count = (room.admin_unread_count || 0) + 1;

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 export const metadata: Metadata = {
   title: 'Classics Coaching | Coaching Personnalisé par Smain Chebab',
@@ -30,6 +31,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         {children}
+        <PushNotificationManager />
       </body>
     </html>
   );

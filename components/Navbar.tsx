@@ -1,9 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Menu, X, User, LogOut, BookOpen, Dumbbell, ShieldCheck, ChevronDown, ShoppingBag } from 'lucide-react';
+import { Menu, X, User, LogOut, BookOpen, Dumbbell, ShieldCheck, ChevronDown, ShoppingBag, Bell, Trash2 } from 'lucide-react';
 import { getClientChatRoom } from '@/app/chat/actions';
+import { 
+  getUserNotifications, 
+  markNotificationAsRead, 
+  markAllNotificationsAsRead, 
+  deleteNotification 
+} from '@/app/notifications/actions';
 
 interface NavbarProps {
   user: any;
@@ -18,6 +24,13 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
   const [isMobileFoodOpen, setIsMobileFoodOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
 
+  // Client notifications states
+  const [userNotifications, setUserNotifications] = useState<any[]>([]);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
+  
+  const notifDropdownRef = useRef<HTMLDivElement>(null);
+
   const toggleMenu = () => {
     setIsOpen(!isOpen);
     if (isOpen) {
@@ -25,6 +38,41 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
       setIsMobileFoodOpen(false);
     }
   };
+
+  const fetchUserNotifs = async () => {
+    if (!user) return;
+    try {
+      const list = await getUserNotifications();
+      setUserNotifications(list);
+      const unreadCount = list.filter((n: any) => !n.is_read).length;
+      setUnreadNotifCount(unreadCount);
+    } catch (err) {
+      console.error("Error fetching client notifications:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      setUserNotifications([]);
+      setUnreadNotifCount(0);
+      return;
+    }
+    
+    fetchUserNotifs();
+    // Poll every 20 seconds for new notifications
+    const interval = setInterval(fetchUserNotifs, 20000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(event.target as Node)) {
+        setIsNotifDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -273,7 +321,182 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
           <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', margin: '0 8px' }} />
           
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
+              {/* Notification Bell Dropdown */}
+              <div ref={notifDropdownRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setIsNotifDropdownOpen(!isNotifDropdownOpen)}
+                  style={{
+                    color: isNotifDropdownOpen ? 'var(--miami-pink)' : 'rgba(226,232,240,0.65)',
+                    cursor: 'pointer',
+                    padding: 8,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    transition: 'color 0.2s',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.05)'
+                  }}
+                  title="Notifications"
+                >
+                  <Bell size={18} />
+                  {unreadNotifCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: 2,
+                      right: 2,
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: 'var(--miami-pink)',
+                      boxShadow: '0 0 6px var(--miami-pink)'
+                    }} />
+                  )}
+                </button>
+
+                {isNotifDropdownOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    background: 'rgba(7, 6, 26, 0.98)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid var(--miami-border)',
+                    borderRadius: 14,
+                    padding: '12px 0',
+                    width: 320,
+                    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 10, 94, 0.12)',
+                    zIndex: 150,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4,
+                    marginTop: 10
+                  }}>
+                    <div style={{ padding: '4px 16px 8px', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>NOTIFICATIONS</span>
+                      {unreadNotifCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await markAllNotificationsAsRead();
+                              fetchUserNotifs();
+                            } catch (err) {
+                              console.error(err);
+                            }
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--miami-pink)',
+                            cursor: 'pointer',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold',
+                            padding: 0
+                          }}
+                        >
+                          Tout marquer comme lu
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ maxHeight: 280, overflowY: 'auto', display: 'flex', flexDirection: 'column' }} className="scroll-mini">
+                      {userNotifications.length === 0 ? (
+                        <div style={{ padding: '30px 16px', color: 'rgba(226,232,240,0.4)', fontSize: '0.8rem', textAlign: 'center' }}>
+                          Aucune notification
+                        </div>
+                      ) : (
+                        userNotifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            style={{
+                              padding: '10px 16px',
+                              borderBottom: '1px solid rgba(255,255,255,0.02)',
+                              display: 'flex',
+                              gap: 10,
+                              alignItems: 'flex-start',
+                              background: notif.is_read ? 'transparent' : 'rgba(255, 45, 120, 0.03)',
+                              transition: 'background 0.2s',
+                              position: 'relative'
+                            }}
+                          >
+                            {!notif.is_read && (
+                              <span style={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: '50%',
+                                background: 'var(--miami-pink)',
+                                marginTop: 6,
+                                flexShrink: 0
+                              }} />
+                            )}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <Link
+                                href={notif.link || '/profile'}
+                                onClick={async () => {
+                                  setIsNotifDropdownOpen(false);
+                                  if (!notif.is_read) {
+                                    try {
+                                      await markNotificationAsRead(notif.id);
+                                      fetchUserNotifs();
+                                    } catch (e) {
+                                      console.error(e);
+                                    }
+                                  }
+                                }}
+                                style={{
+                                  textDecoration: 'none',
+                                  color: 'white',
+                                  display: 'block'
+                                }}
+                              >
+                                <span style={{ fontWeight: 'bold', fontSize: '0.8rem', display: 'block', marginBottom: 2 }}>
+                                  {notif.title}
+                                </span>
+                                <span style={{ color: 'rgba(226,232,240,0.6)', fontSize: '0.75rem', display: 'block', lineHeight: 1.3 }}>
+                                  {notif.body}
+                                </span>
+                              </Link>
+                              <span style={{ fontSize: '0.65rem', color: 'rgba(226,232,240,0.3)', display: 'block', marginTop: 4 }}>
+                                {new Date(notif.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                try {
+                                  await deleteNotification(notif.id);
+                                  fetchUserNotifs();
+                                } catch (e) {
+                                  console.error(e);
+                                }
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'rgba(255,255,255,0.2)',
+                                cursor: 'pointer',
+                                padding: 4,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.color = 'var(--miami-pink)'}
+                              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}
+                              title="Supprimer"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <Link href="/profile" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 18px', textTransform: 'uppercase', letterSpacing: '0.05em', position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 <User size={16} /> Mon Espace
                 {hasUnread && (
@@ -457,7 +680,7 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
             <>
               <Link href="/profile" onClick={toggleMenu} className="btn-primary" style={{ justifyContent: 'center', position: 'relative', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <User size={18} /> Mon Profil
-                {hasUnread && (
+                {(hasUnread || unreadNotifCount > 0) && (
                   <span style={{
                     position: 'absolute',
                     top: '-4px',

@@ -48,6 +48,7 @@ export default function AdminSidebar() {
     { href: '/admin', label: 'Dashboard', icon: <TrendingUp size={18} /> },
     { href: '/admin/users', label: 'Utilisateurs', icon: <Users size={18} /> },
     { href: '/admin/chat', label: 'Messagerie', icon: <MessageSquare size={18} /> },
+    { href: '/admin/notifications', label: 'Notifications', icon: <Bell size={18} /> },
     { href: '/admin/ebooks', label: 'E-books', icon: <BookOpen size={18} /> },
     { href: '/admin/programs', label: 'Programmes', icon: <Dumbbell size={18} /> },
     { href: '/admin/exercises', label: 'Exercices', icon: <Settings size={18} /> },
