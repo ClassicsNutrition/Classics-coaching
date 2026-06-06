@@ -311,49 +311,54 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
                   position: 'absolute',
                   top: '100%',
                   left: 0,
-                  background: 'rgba(7, 6, 26, 0.98)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid var(--miami-border)',
-                  borderRadius: 14,
-                  padding: '12px 0',
-                  minWidth: 210,
-                  boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 10, 94, 0.12)',
-                  zIndex: 150,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 4,
-                  marginTop: 6
+                  paddingTop: 6,
+                  zIndex: 150
                 }}
               >
-                {exerciseCategories.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={`/exercises?muscle=${item.param}`}
-                    style={{
-                      padding: '10px 20px',
-                      fontSize: '0.85rem',
-                      color: 'rgba(245, 240, 255, 0.8)',
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      transition: 'all 0.2s ease-in-out',
-                      fontWeight: 600
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = 'rgba(255, 10, 94, 0.08)';
-                      e.currentTarget.style.color = 'var(--miami-pink)';
-                      e.currentTarget.style.paddingLeft = '24px';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'rgba(245, 240, 255, 0.8)';
-                      e.currentTarget.style.paddingLeft = '20px';
-                    }}
-                  >
-                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span> {item.name}
-                  </Link>
-                ))}
+                <div 
+                  style={{
+                    background: 'rgba(7, 6, 26, 0.98)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid var(--miami-border)',
+                    borderRadius: 14,
+                    padding: '12px 0',
+                    minWidth: 210,
+                    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 10, 94, 0.12)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4
+                  }}
+                >
+                  {exerciseCategories.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={`/exercises?muscle=${item.param}`}
+                      style={{
+                        padding: '10px 20px',
+                        fontSize: '0.85rem',
+                        color: 'rgba(245, 240, 255, 0.8)',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        transition: 'all 0.2s ease-in-out',
+                        fontWeight: 600
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = 'rgba(255, 10, 94, 0.08)';
+                        e.currentTarget.style.color = 'var(--miami-pink)';
+                        e.currentTarget.style.paddingLeft = '24px';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'rgba(245, 240, 255, 0.8)';
+                        e.currentTarget.style.paddingLeft = '20px';
+                      }}
+                    >
+                      <span style={{ fontSize: '1.1rem' }}>{item.icon}</span> {item.name}
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -390,49 +395,54 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
                   position: 'absolute',
                   top: '100%',
                   left: 0,
-                  background: 'rgba(7, 6, 26, 0.98)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid var(--miami-border)',
-                  borderRadius: 14,
-                  padding: '12px 0',
-                  minWidth: 210,
-                  boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 245, 255, 0.12)',
-                  zIndex: 150,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 4,
-                  marginTop: 6
+                  paddingTop: 6,
+                  zIndex: 150
                 }}
               >
-                {foodCategories.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={`/alimentation?category=${item.param}`}
-                    style={{
-                      padding: '10px 20px',
-                      fontSize: '0.85rem',
-                      color: 'rgba(245, 240, 255, 0.8)',
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      transition: 'all 0.2s ease-in-out',
-                      fontWeight: 600
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = 'rgba(0, 245, 255, 0.08)';
-                      e.currentTarget.style.color = 'var(--miami-cyan)';
-                      e.currentTarget.style.paddingLeft = '24px';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'rgba(245, 240, 255, 0.8)';
-                      e.currentTarget.style.paddingLeft = '20px';
-                    }}
-                  >
-                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span> {item.name}
-                  </Link>
-                ))}
+                <div 
+                  style={{
+                    background: 'rgba(7, 6, 26, 0.98)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid var(--miami-border)',
+                    borderRadius: 14,
+                    padding: '12px 0',
+                    minWidth: 210,
+                    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 245, 255, 0.12)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4
+                  }}
+                >
+                  {foodCategories.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={`/alimentation?category=${item.param}`}
+                      style={{
+                        padding: '10px 20px',
+                        fontSize: '0.85rem',
+                        color: 'rgba(245, 240, 255, 0.8)',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        transition: 'all 0.2s ease-in-out',
+                        fontWeight: 600
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = 'rgba(0, 245, 255, 0.08)';
+                        e.currentTarget.style.color = 'var(--miami-cyan)';
+                        e.currentTarget.style.paddingLeft = '24px';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'rgba(245, 240, 255, 0.8)';
+                        e.currentTarget.style.paddingLeft = '20px';
+                      }}
+                    >
+                      <span style={{ fontSize: '1.1rem' }}>{item.icon}</span> {item.name}
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
           </div>
