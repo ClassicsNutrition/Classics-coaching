@@ -64,7 +64,25 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
     if (user && typeof window !== 'undefined' && 'serviceWorker' in navigator && Notification.permission === 'granted') {
       navigator.serviceWorker.ready.then(async (reg) => {
         try {
-          const subscription = await reg.pushManager.getSubscription();
+          let subscription = await reg.pushManager.getSubscription();
+          
+          // Auto-subscribe if they granted permission but don't have an active subscription yet
+          if (!subscription) {
+            const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+            if (vapidPublicKey) {
+              try {
+                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+                subscription = await reg.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: convertedVapidKey
+                });
+                console.log("Device auto-subscribed to Web Push (permission was already granted).");
+              } catch (subErr) {
+                console.error("Failed auto-subscribing in sync effect:", subErr);
+              }
+            }
+          }
+
           if (subscription) {
             await savePushSubscription(subscription.toJSON());
             console.log("Auto-synced Web Push subscription for logged in user.");

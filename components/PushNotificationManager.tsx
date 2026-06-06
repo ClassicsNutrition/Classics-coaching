@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Bell, X } from 'lucide-react';
+import { savePushSubscription } from '@/app/notifications/actions';
 
 const MOTIVATIONAL_QUOTES = [
   "L'entraînement du jour vous attend. Pas d'excuses ! 💪",
@@ -83,22 +84,68 @@ export default function PushNotificationManager() {
     }
   }
 
-  // Request system notification permission
+  // Convert VAPID public key from base64 to Uint8Array
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  // Request system notification permission and subscribe to Web Push
   async function handleEnableNotifications() {
     setShowBanner(false);
     
-    if (!('Notification' in window)) return;
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
     
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        const reg = await navigator.serviceWorker.ready;
-        reg.showNotification("Classics Coaching ⚡", {
-          body: "Notifications activées ! Vous recevrez des rappels d'entraînement toutes les 4 heures. 💪",
-          icon: '/icon.png',
-          badge: '/icon.png',
-          data: { url: '/' }
-        });
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          
+          // Subscribe to Web Push
+          const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+          if (vapidPublicKey) {
+            try {
+              const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+              const subscription = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidKey
+              });
+              
+              try {
+                await savePushSubscription(subscription.toJSON());
+                console.log("Device subscribed to Web Push successfully via banner.");
+              } catch (saveErr: any) {
+                if (saveErr?.message === "Non connecté.") {
+                  console.log("Push permission granted, subscription will be synced once the user logs in.");
+                } else {
+                  console.error("Error saving push subscription via banner:", saveErr);
+                }
+              }
+            } catch (pushErr) {
+              console.error("Failed to subscribe to Web Push service via banner:", pushErr);
+            }
+          } else {
+            console.warn("VAPID public key not found in environment for banner subscription.");
+          }
+
+          reg.showNotification("Classics Coaching ⚡", {
+            body: "Notifications activées ! Vous recevrez nos alertes et rappels d'entraînement. 💪",
+            icon: '/icon.png',
+            badge: '/icon.png',
+            data: { url: '/' }
+          });
+        }
         
         // Start the check right away
         localStorage.setItem('last_motivation_notif_time', Date.now().toString());
