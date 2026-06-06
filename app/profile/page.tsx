@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import ProfileFavoritesList from '@/components/ProfileFavoritesList';
 import ProfileAvatarEditor from '@/components/ProfileAvatarEditor';
 import ProfileChat from '@/components/ProfileChat';
+import ProfileMorphologyForm from '@/components/ProfileMorphologyForm';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -221,6 +222,16 @@ export default async function ProfilePage() {
 
           <ProfileFavoritesList initialExercises={favoriteExercises} userId={user.id} />
         </div>
+
+        {/* Profil Morphologique */}
+        <ProfileMorphologyForm 
+          userId={user.id}
+          initialHeight={profile?.height}
+          initialWeight={profile?.weight}
+          initialObjective={profile?.objective}
+          initialMedicalHistory={profile?.medical_history}
+          initialSportsHistory={profile?.sports_history}
+        />
 
         {/* Messagerie avec le Coach */}
         <div id="messagerie-coach" className="card-glass animate-fadeInUp animate-delay-300" style={{ padding: 'clamp(24px, 4vw, 32px)', marginTop: 32 }}>

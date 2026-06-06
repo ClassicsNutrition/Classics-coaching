@@ -281,3 +281,27 @@ export async function deleteContentReservation(reservationId: string) {
   if (error) throw error;
   return { success: true };
 }
+
+export async function updateUserProfileByAdmin(
+  userId: string,
+  data: {
+    height?: number | null;
+    weight?: number | null;
+    objective?: string | null;
+    medical_history?: string | null;
+    sports_history?: string | null;
+  }
+) {
+  await checkAdminOrThrow();
+  const supabase = await createAdminClient();
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(data)
+    .eq('id', userId);
+
+  if (error) throw error;
+
+  revalidatePath('/admin/users');
+  return { success: true };
+}

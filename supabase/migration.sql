@@ -319,3 +319,14 @@ CREATE TRIGGER check_profile_role_update_trigger
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE PROCEDURE check_profile_role_update();
 
+-- ============================================================
+-- 13. MORPHOLOGICAL USER PROFILE COLUMNS
+-- ============================================================
+ALTER TABLE public.profiles 
+ADD COLUMN IF NOT EXISTS height NUMERIC,
+ADD COLUMN IF NOT EXISTS weight NUMERIC,
+ADD COLUMN IF NOT EXISTS objective TEXT,
+ADD COLUMN IF NOT EXISTS medical_history TEXT,
+ADD COLUMN IF NOT EXISTS sports_history TEXT;
+
+

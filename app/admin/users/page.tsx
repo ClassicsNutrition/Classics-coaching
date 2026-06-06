@@ -11,7 +11,8 @@ import {
 import { 
   getAdminUsersList, banUser, unbanUser, 
   deleteUserPermanently, toggleAdminRole,
-  getAdminReservations, updateReservationStatus
+  getAdminReservations, updateReservationStatus,
+  updateUserProfileByAdmin
 } from '../actions';
 
 function UsersPageContent() {
@@ -22,6 +23,24 @@ function UsersPageContent() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const [selectedUserProfile, setSelectedUserProfile] = useState<any | null>(null);
+  const [editHeight, setEditHeight] = useState('');
+  const [editWeight, setEditWeight] = useState('');
+  const [editObjective, setEditObjective] = useState('');
+  const [editMedicalHistory, setEditMedicalHistory] = useState('');
+  const [editSportsHistory, setEditSportsHistory] = useState('');
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedUserProfile) {
+      setEditHeight(selectedUserProfile.height ? selectedUserProfile.height.toString() : '');
+      setEditWeight(selectedUserProfile.weight ? selectedUserProfile.weight.toString() : '');
+      setEditObjective(selectedUserProfile.objective || '');
+      setEditMedicalHistory(selectedUserProfile.medical_history || '');
+      setEditSportsHistory(selectedUserProfile.sports_history || '');
+    }
+  }, [selectedUserProfile]);
 
   // Sync tab from search parameter
   useEffect(() => {
@@ -268,6 +287,15 @@ function UsersPageContent() {
                             <MessageSquare size={16} />
                           </Link>
 
+                          <button
+                            onClick={() => setSelectedUserProfile(u)}
+                            className="btn-ghost"
+                            title="Consulter le profil morphologique"
+                            style={{ padding: 8, color: 'var(--miami-pink)', display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            <Users size={16} />
+                          </button>
+
                           <button 
                             onClick={() => handleUserAction(() => toggleAdminRole(u.id, u.role), u.id)}
                             className="btn-ghost" 
@@ -449,6 +477,182 @@ function UsersPageContent() {
             </div>
           </div>
         )
+      )}
+
+      {/* Morphological Profile Modal */}
+      {selectedUserProfile && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(7, 6, 26, 0.85)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20
+        }}>
+          <div className="card-glass scroll-mini" style={{
+            width: '100%',
+            maxWidth: 600,
+            padding: '24px 32px',
+            borderRadius: 16,
+            background: 'rgba(7, 6, 26, 0.98)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 245, 255, 0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 20,
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: 12 }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white', fontFamily: 'var(--font-display)', margin: 0 }}>
+                  Fiche Morphologique
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'rgba(226, 232, 240, 0.5)', margin: '2px 0 0 0' }}>
+                  Client : {selectedUserProfile.full_name || 'Inconnu'} ({selectedUserProfile.email})
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedUserProfile(null)}
+                style={{ background: 'none', border: 'none', color: 'rgba(226, 232, 240, 0.4)', cursor: 'pointer', padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setSaveLoading(true);
+              try {
+                const parsedHeight = editHeight ? parseFloat(editHeight) : null;
+                const parsedWeight = editWeight ? parseFloat(editWeight) : null;
+                
+                await updateUserProfileByAdmin(selectedUserProfile.id, {
+                  height: parsedHeight,
+                  weight: parsedWeight,
+                  objective: editObjective || null,
+                  medical_history: editMedicalHistory || null,
+                  sports_history: editSportsHistory || null
+                });
+                
+                alert("Fiche morphologique enregistrée avec succès !");
+                setSelectedUserProfile(null);
+                loadData(); // reload users list
+              } catch (err: any) {
+                alert("Erreur lors de la sauvegarde : " + err.message);
+              } finally {
+                setSaveLoading(false);
+              }
+            }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              
+              {/* Height / Weight / Objective Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.6)', fontWeight: 600, marginBottom: 6 }}>Taille (cm)</label>
+                  <input
+                    type="number"
+                    className="input-miami"
+                    placeholder="Non renseignée"
+                    value={editHeight}
+                    onChange={e => setEditHeight(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '0.8rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.6)', fontWeight: 600, marginBottom: 6 }}>Poids (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    className="input-miami"
+                    placeholder="Non renseigné"
+                    value={editWeight}
+                    onChange={e => setEditWeight(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '0.8rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.6)', fontWeight: 600, marginBottom: 6 }}>Objectif</label>
+                  <select
+                    className="input-miami"
+                    value={editObjective}
+                    onChange={e => setEditObjective(e.target.value)}
+                    style={{ 
+                      width: '100%', 
+                      padding: '8px 12px', 
+                      fontSize: '0.8rem',
+                      background: 'rgba(7, 6, 26, 0.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '10px',
+                      color: '#F5F0FF',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="" style={{ background: 'rgba(7, 6, 26, 0.98)' }}>Non spécifié</option>
+                    <option value="prise_de_masse" style={{ background: 'rgba(7, 6, 26, 0.98)' }}>Prise de masse 💪</option>
+                    <option value="perte_de_poids" style={{ background: 'rgba(7, 6, 26, 0.98)' }}>Perte de poids 🎯</option>
+                    <option value="maintien" style={{ background: 'rgba(7, 6, 26, 0.98)' }}>Maintien & Recomp ⚖️</option>
+                    <option value="sante" style={{ background: 'rgba(7, 6, 26, 0.98)' }}>Santé / Forme 🌱</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Medical History */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.6)', fontWeight: 600, marginBottom: 6 }}>Antécédents médicaux / Blessures / Limitations</label>
+                <textarea
+                  className="input-miami"
+                  placeholder="Aucun antécédent médical renseigné par le client."
+                  value={editMedicalHistory}
+                  onChange={e => setEditMedicalHistory(e.target.value)}
+                  rows={3}
+                  style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', resize: 'vertical' }}
+                />
+              </div>
+
+              {/* Sports History */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.6)', fontWeight: 600, marginBottom: 6 }}>Antécédents sportifs / Expérience</label>
+                <textarea
+                  className="input-miami"
+                  placeholder="Aucune expérience sportive renseignée par le client."
+                  value={editSportsHistory}
+                  onChange={e => setEditSportsHistory(e.target.value)}
+                  rows={3}
+                  style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', resize: 'vertical' }}
+                />
+              </div>
+
+              {/* Modal Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedUserProfile(null)}
+                  className="btn-ghost"
+                  style={{ padding: '8px 16px', fontSize: '0.8rem' }}
+                >
+                  Fermer
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={saveLoading}
+                  style={{ padding: '8px 20px', fontSize: '0.8rem', background: 'var(--miami-pink)' }}
+                >
+                  {saveLoading ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
