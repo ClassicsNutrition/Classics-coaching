@@ -14,6 +14,17 @@ export default function AdminNotificationsPage() {
   const [body, setBody] = useState('');
   const [targetType, setTargetType] = useState<'all' | 'targeted'>('all');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [link, setLink] = useState('/profile');
+  
+  const PRESET_LINKS = [
+    { label: 'Espace Client (Par défaut)', value: '/profile' },
+    { label: 'Page d\'accueil', value: '/' },
+    { label: 'Bibliothèque d\'exercices', value: '/exercises' },
+    { label: 'Programmes d\'entraînement', value: '/programs' },
+    { label: 'Guide de nutrition', value: '/alimentation' },
+    { label: 'Boutique compléments', value: '/shop' },
+    { label: 'E-books', value: '/ebooks' }
+  ];
   
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
@@ -65,7 +76,7 @@ export default function AdminNotificationsPage() {
 
     setSending(true);
     try {
-      const res = await createAdminNotification(title, body, targetType, selectedUsers);
+      const res = await createAdminNotification(title, body, targetType, selectedUsers, link);
       alert(`Notification envoyée avec succès à ${res.count} utilisateur(s).`);
       
       // Reset form
@@ -73,6 +84,7 @@ export default function AdminNotificationsPage() {
       setBody('');
       setSelectedUsers([]);
       setTargetType('all');
+      setLink('/profile');
       
       // Reload history
       const updatedHistory = await getAdminSentNotifications();
@@ -147,6 +159,31 @@ export default function AdminNotificationsPage() {
                     rows={4}
                     style={{ width: '100%', padding: '12px 14px', fontSize: '0.85rem', resize: 'vertical' }}
                   />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'rgba(226,232,240,0.6)', fontWeight: 600, marginBottom: 6 }}>Page de redirection au clic</label>
+                  <select
+                    className="input-miami"
+                    value={link}
+                    onChange={e => setLink(e.target.value)}
+                    style={{ 
+                      width: '100%', 
+                      padding: '10px 14px', 
+                      fontSize: '0.85rem', 
+                      background: 'rgba(7, 6, 26, 0.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '10px',
+                      color: '#F5F0FF',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {PRESET_LINKS.map(opt => (
+                      <option key={opt.value} value={opt.value} style={{ background: 'rgba(7, 6, 26, 0.98)', color: '#F5F0FF' }}>
+                        {opt.label} ({opt.value})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -297,6 +334,7 @@ export default function AdminNotificationsPage() {
                       
                       <div style={{ fontSize: '0.7rem', color: 'var(--miami-cyan)', marginTop: 4, display: 'flex', justifyContent: 'space-between' }}>
                         <span>Destinataire : {notif.profiles?.full_name || "Utilisateur inconnu"}</span>
+                        {notif.link && <span>Lien : {notif.link}</span>}
                       </div>
                     </div>
                   ))

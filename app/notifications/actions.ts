@@ -89,7 +89,7 @@ export async function deleteNotification(id: string) {
 // 5. Create notifications (Admin only)
 // If target is "all", it will create notification for all clients.
 // Otherwise it will target specific userIds in the array.
-export async function createAdminNotification(title: string, body: string, targetType: 'all' | 'targeted', userIds: string[]) {
+export async function createAdminNotification(title: string, body: string, targetType: 'all' | 'targeted', userIds: string[], link?: string) {
   const isAdmin = await isAdminUser();
   if (!isAdmin) throw new Error("Accès refusé : Administrateurs uniquement.");
 
@@ -119,7 +119,8 @@ export async function createAdminNotification(title: string, body: string, targe
     title,
     body,
     type: 'admin_broadcast',
-    is_read: false
+    is_read: false,
+    link: link || '/profile'
   }));
 
   const { error: insertErr } = await adminSupabase
@@ -130,7 +131,7 @@ export async function createAdminNotification(title: string, body: string, targe
 
   // Send real Web Push notifications asynchronously
   recipientIds.forEach(uid => {
-    sendPushToUser(uid, title, body, '/profile').catch(err => {
+    sendPushToUser(uid, title, body, link || '/profile').catch(err => {
       console.error("Failed to send background web push to user:", uid, err);
     });
   });
@@ -166,6 +167,7 @@ export async function getAdminSentNotifications() {
       id,
       title,
       body,
+      link,
       created_at,
       user_id,
       profiles (
