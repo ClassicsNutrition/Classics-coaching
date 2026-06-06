@@ -13,6 +13,12 @@ import {
   ChevronUp, ChevronDown, UserPlus, Users, FileText, 
   Eye, EyeOff, Zap, Layout, Settings, BookOpen
 } from 'lucide-react';
+import { 
+  getContentReservations, 
+  grantContentAccess, 
+  toggleContentAccess, 
+  deleteContentReservation 
+} from '../../actions';
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -50,13 +56,12 @@ export default function AdminEbookEditorPage({ params }: Props) {
 
   async function loadReservations(contentId?: string) {
     if (!contentId) return;
-    const { data } = await supabase
-      .from('reservations')
-      .select('*, profiles(email)')
-      .eq('content_id', contentId)
-      .eq('content_type', 'ebook')
-      .order('created_at', { ascending: false });
-    setReservations(data || []);
+    try {
+      const data = await getContentReservations(contentId, 'ebook');
+      setReservations(data);
+    } catch (err) {
+      console.error("Failed to load reservations:", err);
+    }
   }
 
   async function handleSave() {
@@ -286,39 +291,34 @@ export default function AdminEbookEditorPage({ params }: Props) {
 
   async function handleGrantAccess(email: string) {
     setGrantLoading(email);
-    // Find user profile by email
-    const { data: prof } = await supabase.from('profiles').select('id').eq('email', email.trim()).maybeSingle();
-    
-    if (!prof) {
-      alert("Ce client n'a pas encore créé de compte sur le site. Il doit s'inscrire avant que vous puissiez lui accorder l'accès.");
-      setGrantLoading('');
-      return;
-    }
-
-    const { error } = await supabase.from('reservations').upsert({
-      user_id: prof.id,
-      content_type: 'ebook',
-      content_id: ebook.id,
-      status: 'granted'
-    }, { onConflict: 'user_id,content_type,content_id' });
-
-    if (!error) {
+    try {
+      await grantContentAccess(email, ebook.id, 'ebook');
       setNewEmail('');
       loadReservations(ebook.id);
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de l'octroi d'accès.");
+    } finally {
+      setGrantLoading('');
     }
-    setGrantLoading('');
   }
 
   async function handleToggleAccess(id: string, currentStatus: string) {
-    const newStatus = currentStatus === 'granted' ? 'revoked' : 'granted';
-    const { error } = await supabase.from('reservations').update({ status: newStatus }).eq('id', id);
-    if (!error) loadReservations(ebook.id);
+    try {
+      await toggleContentAccess(id, currentStatus);
+      loadReservations(ebook.id);
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de la modification de l'accès.");
+    }
   }
 
   async function handleDeleteReservation(id: string) {
     if (!confirm('Supprimer définitivement cet accès ?')) return;
-    await supabase.from('reservations').delete().eq('id', id);
-    loadReservations(ebook.id);
+    try {
+      await deleteContentReservation(id);
+      loadReservations(ebook.id);
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de la suppression de l'accès.");
+    }
   }
 }
 

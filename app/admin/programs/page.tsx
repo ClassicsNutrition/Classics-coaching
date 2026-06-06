@@ -5,6 +5,11 @@ import { Dumbbell, Plus, Eye, Edit } from 'lucide-react';
 
 export default async function AdminProgramsPage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+  
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  if (!profile || profile.role !== 'admin') redirect('/');
 
   const { data: programs } = await supabase
     .from('programs')
@@ -14,6 +19,11 @@ export default async function AdminProgramsPage() {
   async function createProgram(formData: FormData) {
     'use server';
     const sb = await createClient();
+    const { data: { user: currentUser } } = await sb.auth.getUser();
+    if (!currentUser) throw new Error("Accès refusé.");
+    const { data: currentProfile } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
+    if (!currentProfile || currentProfile.role !== 'admin') throw new Error("Accès refusé.");
+
     const title = formData.get('title') as string;
     const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const { data } = await sb.from('programs').insert({ title, slug }).select('slug').single();

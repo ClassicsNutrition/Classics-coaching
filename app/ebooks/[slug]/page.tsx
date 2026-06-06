@@ -114,6 +114,10 @@ function RequestAccessButton({ ebookId, userId }: { ebookId: string; userId: str
   async function requestAccess() {
     'use server';
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== userId) {
+      throw new Error("Accès interdit : Utilisateur non authentifié ou incorrect.");
+    }
     await supabase.from('reservations').upsert({
       user_id: userId,
       content_type: 'ebook',

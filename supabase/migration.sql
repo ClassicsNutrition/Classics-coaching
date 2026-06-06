@@ -293,3 +293,29 @@ CREATE POLICY "Users can manage their own subscriptions"
 CREATE POLICY "Admins can view all subscriptions" 
   ON push_subscriptions FOR SELECT 
   USING (public.is_admin());
+
+-- ============================================================
+-- 12. ROLE PROTECTION TRIGGER (Prevents privilege escalation)
+-- ============================================================
+
+-- Déclencheur pour empêcher l'élévation de privilèges ou la modification du statut de bannissement par des clients
+CREATE OR REPLACE FUNCTION check_profile_role_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (auth.role() = 'authenticated' OR auth.role() = 'anon') THEN
+    IF OLD.role IS DISTINCT FROM NEW.role THEN
+      RAISE EXCEPTION 'Modification du rôle non autorisée.';
+    END IF;
+    IF OLD.banned_until IS DISTINCT FROM NEW.banned_until THEN
+      RAISE EXCEPTION 'Modification du statut de bannissement non autorisée.';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS check_profile_role_update_trigger ON public.profiles;
+CREATE TRIGGER check_profile_role_update_trigger
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE PROCEDURE check_profile_role_update();
+

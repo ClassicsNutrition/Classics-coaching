@@ -7,6 +7,9 @@ export default async function AdminEbooksPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
+  
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  if (!profile || profile.role !== 'admin') redirect('/');
 
   const { data: ebooks } = await supabase
     .from('ebooks')
@@ -16,6 +19,11 @@ export default async function AdminEbooksPage() {
   async function createEbook(formData: FormData) {
     'use server';
     const sb = await createClient();
+    const { data: { user: currentUser } } = await sb.auth.getUser();
+    if (!currentUser) throw new Error("Accès refusé.");
+    const { data: currentProfile } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
+    if (!currentProfile || currentProfile.role !== 'admin') throw new Error("Accès refusé.");
+
     const title = formData.get('title') as string;
     const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const { data } = await sb.from('ebooks').insert({ title, slug }).select('slug').single();

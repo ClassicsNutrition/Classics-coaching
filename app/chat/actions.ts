@@ -159,8 +159,34 @@ export async function getChatMessages(roomId: string) {
 
 // 4. Mark room as read
 export async function markChatAsRead(roomId: string, role: 'admin' | 'client') {
+  const supabase = await createClient();
+  const { data: { user }, error: uError } = await supabase.auth.getUser();
+  if (uError || !user) throw new Error("Accès refusé : Non connecté.");
+
   const adminSupabase = await createAdminClient();
-  
+
+  // Fetch the room to verify access
+  const { data: room, error: rError } = await adminSupabase
+    .from('chat_rooms')
+    .select('*')
+    .eq('id', roomId)
+    .single();
+
+  if (rError || !room) throw new Error("Salon de discussion introuvable.");
+
+  const isAdmin = await isAdminUser();
+
+  if (role === 'admin') {
+    if (!isAdmin) {
+      throw new Error("Accès refusé : Administrateurs uniquement.");
+    }
+  } else {
+    // Client can only mark their own room as read
+    if (room.user_id !== user.id) {
+      throw new Error("Accès interdit.");
+    }
+  }
+
   const updates: any = {};
   if (role === 'admin') {
     updates.admin_unread_count = 0;
@@ -176,6 +202,7 @@ export async function markChatAsRead(roomId: string, role: 'admin' | 'client') {
   if (error) throw error;
   return { success: true };
 }
+
 
 // 5. Get all chat rooms for admin
 export async function getAdminChatRooms() {

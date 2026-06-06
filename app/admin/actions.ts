@@ -1,9 +1,27 @@
 'use server';
 
-import { createAdminClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+// Helper to check if current user is admin
+async function checkAdminOrThrow() {
+  const clientSupabase = await createClient();
+  const { data: { user } } = await clientSupabase.auth.getUser();
+  if (!user) throw new Error("Accès refusé : Non connecté.");
+
+  const { data: profile } = await clientSupabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    throw new Error("Accès refusé : Administrateur uniquement.");
+  }
+}
+
 export async function getAdminUsersList() {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
   
   // Get all profiles
@@ -33,6 +51,7 @@ export async function getAdminUsersList() {
 }
 
 export async function banUser(userId: string, hours: number = 87600) { // 10 years default
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
   const bannedUntil = new Date();
   bannedUntil.setHours(bannedUntil.getHours() + hours);
@@ -49,6 +68,7 @@ export async function banUser(userId: string, hours: number = 87600) { // 10 yea
 }
 
 export async function unbanUser(userId: string) {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
 
   const { error } = await supabase
@@ -63,6 +83,7 @@ export async function unbanUser(userId: string) {
 }
 
 export async function deleteUserPermanently(userId: string) {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
 
   // Supabase admin delete handles both Auth and (if CASCADE set) Profiles
@@ -75,6 +96,7 @@ export async function deleteUserPermanently(userId: string) {
 }
 
 export async function toggleAdminRole(userId: string, currentRole: string) {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
   const newRole = currentRole === 'admin' ? 'client' : 'admin';
 
@@ -90,6 +112,7 @@ export async function toggleAdminRole(userId: string, currentRole: string) {
 }
 
 export async function getPendingReservationsCount() {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
   const { count, error } = await supabase
     .from('reservations')
@@ -100,6 +123,7 @@ export async function getPendingReservationsCount() {
 }
 
 export async function getPendingReservations() {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
   
   const { data: res, error } = await supabase
@@ -134,6 +158,7 @@ export async function getPendingReservations() {
 }
 
 export async function getAdminReservations() {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
   
   const { data: res, error } = await supabase
@@ -167,6 +192,7 @@ export async function getAdminReservations() {
 }
 
 export async function updateReservationStatus(id: string, status: 'granted' | 'revoked' | 'pending') {
+  await checkAdminOrThrow();
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from('reservations')
@@ -175,5 +201,83 @@ export async function updateReservationStatus(id: string, status: 'granted' | 'r
   if (error) throw error;
   
   revalidatePath('/admin/users');
+  return { success: true };
+}
+
+export async function getContentReservations(contentId: string, contentType: 'ebook' | 'program') {
+  await checkAdminOrThrow();
+  const supabase = await createAdminClient();
+  
+  const { data: res, error } = await supabase
+    .from('reservations')
+    .select('id, user_id, content_type, content_id, status, created_at')
+    .eq('content_id', contentId)
+    .eq('content_type', contentType)
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  if (!res || res.length === 0) return [];
+  
+  const usersList = await getAdminUsersList();
+  
+  return res.map((r: any) => {
+    const user = usersList.find(u => u.id === r.user_id);
+    return {
+      ...r,
+      profiles: {
+        email: user?.email || 'Inconnu'
+      }
+    };
+  });
+}
+
+export async function grantContentAccess(email: string, contentId: string, contentType: 'ebook' | 'program') {
+  await checkAdminOrThrow();
+  const supabase = await createAdminClient();
+  
+  // Find user by email from the auth users
+  const { data: { users }, error: aError } = await supabase.auth.admin.listUsers();
+  if (aError) throw aError;
+  
+  const targetUser = users.find(u => u.email?.toLowerCase() === email.trim().toLowerCase());
+  if (!targetUser) {
+    throw new Error("Ce client n'a pas encore créé de compte sur le site. Il doit s'inscrire avant que vous puissiez lui accorder l'accès.");
+  }
+  
+  const { error } = await supabase.from('reservations').upsert({
+    user_id: targetUser.id,
+    content_type: contentType,
+    content_id: contentId,
+    status: 'granted'
+  }, { onConflict: 'user_id,content_type,content_id' });
+  
+  if (error) throw error;
+  return { success: true };
+}
+
+export async function toggleContentAccess(reservationId: string, currentStatus: string) {
+  await checkAdminOrThrow();
+  const supabase = await createAdminClient();
+  const newStatus = currentStatus === 'granted' ? 'revoked' : 'granted';
+  
+  const { error } = await supabase
+    .from('reservations')
+    .update({ status: newStatus })
+    .eq('id', reservationId);
+    
+  if (error) throw error;
+  return { success: true };
+}
+
+export async function deleteContentReservation(reservationId: string) {
+  await checkAdminOrThrow();
+  const supabase = await createAdminClient();
+  
+  const { error } = await supabase
+    .from('reservations')
+    .delete()
+    .eq('id', reservationId);
+    
+  if (error) throw error;
   return { success: true };
 }
