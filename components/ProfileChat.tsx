@@ -31,7 +31,7 @@ export default function ProfileChat() {
 
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const exerciseSelectorRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadChatRoom();
@@ -97,9 +97,11 @@ export default function ProfileChat() {
     return () => clearInterval(interval);
   }, [room?.id]);
 
-  // Scroll to bottom when messages list changes
+  // Scroll to bottom of the container when messages list changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   async function handleSendMessage(e: React.FormEvent) {
@@ -151,7 +153,10 @@ export default function ProfileChat() {
       </div>
 
       {/* Messages Log */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: 12, background: 'rgba(0,0,0,0.1)' }}>
+      <div 
+        ref={chatContainerRef}
+        style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: 12, background: 'rgba(0,0,0,0.1)' }}
+      >
         {messages.length === 0 ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(226,232,240,0.3)', padding: 20 }}>
             <MessageCircle size={32} style={{ marginBottom: 8, opacity: 0.2 }} />
@@ -301,7 +306,6 @@ export default function ProfileChat() {
             );
           })
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input form */}

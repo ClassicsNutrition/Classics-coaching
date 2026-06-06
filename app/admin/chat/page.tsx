@@ -39,7 +39,7 @@ function AdminChatContent() {
 
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const exerciseSelectorRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const targetUserId = searchParams.get('userId');
 
   // Load exercises list on mount
@@ -153,9 +153,11 @@ function AdminChatContent() {
     }
   }
 
-  // Scroll to bottom when messages list changes
+  // Scroll to bottom of the container when messages list changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   // Send message handler
@@ -313,7 +315,10 @@ function AdminChatContent() {
             </div>
 
             {/* Chat Messages Log */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16, background: 'rgba(0,0,0,0.1)' }}>
+            <div 
+              ref={chatContainerRef}
+              style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16, background: 'rgba(0,0,0,0.1)' }}
+            >
               {loadingMessages && messages.length === 0 ? (
                 <div style={{ color: 'rgba(226,232,240,0.4)', textAlign: 'center', padding: 20 }}>Chargement des messages...</div>
               ) : messages.length === 0 ? (
@@ -466,7 +471,6 @@ function AdminChatContent() {
                   );
                 })
               )}
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Message Form */}
