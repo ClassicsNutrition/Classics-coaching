@@ -32,6 +32,8 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
   
   const notifDropdownRef = useRef<HTMLDivElement>(null);
   const notifDropdownRefMobile = useRef<HTMLDivElement>(null);
+  const shownNotifIdsRef = useRef<Set<string>>(new Set());
+  const isFirstFetchRef = useRef(true);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -48,12 +50,55 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
       setUserNotifications(list);
       const unreadCount = list.filter((n: any) => !n.is_read).length;
       setUnreadNotifCount(unreadCount);
+
+      if (isFirstFetchRef.current) {
+        list.forEach((n: any) => shownNotifIdsRef.current.add(n.id));
+        isFirstFetchRef.current = false;
+      } else {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          const newUnread = list.filter((n: any) => !n.is_read && !shownNotifIdsRef.current.has(n.id));
+          if (newUnread.length > 0) {
+            newUnread.forEach((n: any) => shownNotifIdsRef.current.add(n.id));
+            if ('serviceWorker' in navigator) {
+              try {
+                const reg = await navigator.serviceWorker.ready;
+                newUnread.forEach((n: any) => {
+                  reg.showNotification(n.title || "Classics Coaching", {
+                    body: n.body,
+                    icon: '/icon.png',
+                    badge: '/icon.png',
+                    data: { url: n.link || '/profile' }
+                  });
+                });
+              } catch (swErr) {
+                console.error("SW ready failed, fallback:", swErr);
+                newUnread.forEach((n: any) => {
+                  new Notification(n.title || "Classics Coaching", {
+                    body: n.body,
+                    icon: '/icon.png'
+                  });
+                });
+              }
+            } else {
+              newUnread.forEach((n: any) => {
+                new Notification(n.title || "Classics Coaching", {
+                  body: n.body,
+                  icon: '/icon.png'
+                });
+              });
+            }
+          }
+        }
+      }
     } catch (err) {
       console.error("Error fetching client notifications:", err);
     }
   };
 
   useEffect(() => {
+    isFirstFetchRef.current = true;
+    shownNotifIdsRef.current.clear();
+
     if (!user) {
       setUserNotifications([]);
       setUnreadNotifCount(0);
