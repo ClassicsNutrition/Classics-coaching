@@ -62,18 +62,13 @@ export default function EbookRenderer({ blocks, pdfUrl, themePrimary = '#FF2D78'
 
           case 'exercise':
             return (
-              <div key={block.id} style={{
-                display: 'grid',
-                gridTemplateColumns: block.gifUrl ? (block.imageAlign === 'left' ? '280px 1fr' : '1fr 280px') : '1fr',
-                gap: 28,
-                alignItems: 'start',
-                background: 'rgba(255,255,255,0.03)',
-                border: `1px solid ${themePrimary}25`,
-                borderRadius: 16,
-                padding: 28,
-              }}>
+              <div 
+                key={block.id} 
+                className={`ebook-exercise-grid ${block.gifUrl ? (block.imageAlign === 'left' ? 'align-left' : 'align-right') : ''}`}
+                style={{ border: `1px solid ${themePrimary}25` }}
+              >
                 {block.imageAlign === 'left' && block.gifUrl && (
-                  <img src={block.gifUrl} alt={block.name} style={{ width: '100%', borderRadius: 12, border: `1px solid ${themePrimary}20` }} />
+                  <img src={block.gifUrl} alt={block.name} className="ebook-exercise-image" style={{ border: `1px solid ${themePrimary}20` }} />
                 )}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -111,7 +106,7 @@ export default function EbookRenderer({ blocks, pdfUrl, themePrimary = '#FF2D78'
                   )}
                 </div>
                 {block.imageAlign === 'right' && block.gifUrl && (
-                  <img src={block.gifUrl} alt={block.name} style={{ width: '100%', borderRadius: 12, border: `1px solid ${themePrimary}20` }} />
+                  <img src={block.gifUrl} alt={block.name} className="ebook-exercise-image" style={{ border: `1px solid ${themePrimary}20` }} />
                 )}
               </div>
             );
@@ -199,6 +194,35 @@ export default function EbookRenderer({ blocks, pdfUrl, themePrimary = '#FF2D78'
           </a>
         </div>
       )}
+
+      <style>{`
+        .ebook-exercise-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          align-items: start;
+          background: rgba(255,255,255,0.03);
+          border-radius: 16px;
+          padding: 16px;
+        }
+        @media (min-width: 768px) {
+          .ebook-exercise-grid {
+            gap: 28px;
+            padding: 28px;
+          }
+          .ebook-exercise-grid.align-left {
+            grid-template-columns: 280px 1fr;
+          }
+          .ebook-exercise-grid.align-right {
+            grid-template-columns: 1fr 280px;
+          }
+        }
+        .ebook-exercise-image {
+          width: 100%;
+          border-radius: 12px;
+          object-fit: cover;
+        }
+      `}</style>
     </div>
   );
 }

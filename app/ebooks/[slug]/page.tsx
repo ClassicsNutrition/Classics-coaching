@@ -47,7 +47,7 @@ export default async function EbookPage({ params }: Props) {
     <div style={{ minHeight: '100vh', background: 'var(--miami-night)' }}>
       <Navbar user={user} isAdmin={isAdmin} />
 
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '48px 24px' }}>
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: 'clamp(24px, 5vw, 48px) clamp(12px, 3vw, 24px)' }}>
         <Link href="/ebooks" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(226,232,240,0.5)', fontSize: '0.85rem', textDecoration: 'none', marginBottom: 32 }}>
           <ArrowLeft size={16} /> Tous les e-books
         </Link>
@@ -69,7 +69,7 @@ export default async function EbookPage({ params }: Props) {
 
         {/* Access Gate */}
         {!hasAccess ? (
-          <div className="card-glass" style={{ padding: 64, textAlign: 'center' }}>
+          <div className="card-glass" style={{ padding: 'clamp(24px, 6vw, 64px)', textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: 16 }}>🔒</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 800, color: 'white', marginBottom: 12 }}>
               Contenu Réservé
@@ -95,7 +95,7 @@ export default async function EbookPage({ params }: Props) {
             )}
           </div>
         ) : (
-          <div className="card-glass" style={{ padding: 48 }}>
+          <div className="card-glass" style={{ padding: 'clamp(16px, 5vw, 48px)' }}>
             <EbookRenderer
               blocks={(ebook.sections || []) as Block[]}
               pdfUrl={ebook.pdf_url}

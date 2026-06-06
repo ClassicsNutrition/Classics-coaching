@@ -28,8 +28,10 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
   const [userNotifications, setUserNotifications] = useState<any[]>([]);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
+  const [isNotifDropdownOpenMobile, setIsNotifDropdownOpenMobile] = useState(false);
   
   const notifDropdownRef = useRef<HTMLDivElement>(null);
+  const notifDropdownRefMobile = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -68,6 +70,9 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
     function handleClickOutside(event: MouseEvent) {
       if (notifDropdownRef.current && !notifDropdownRef.current.contains(event.target as Node)) {
         setIsNotifDropdownOpen(false);
+      }
+      if (notifDropdownRefMobile.current && !notifDropdownRefMobile.current.contains(event.target as Node)) {
+        setIsNotifDropdownOpenMobile(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -526,21 +531,197 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
           )}
         </div>
 
-        {/* Mobile Toggle */}
-        <button 
-          className="show-mobile" 
-          onClick={toggleMenu}
-          style={{ 
-            background: 'none', 
-            border: 'none', 
-            color: 'white', 
-            cursor: 'pointer',
-            padding: 8,
-            display: 'none' // Hidden by CSS query except on mobile
-          }}
-        >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
+        {/* Mobile Header Buttons (Bell + Hamburger) */}
+        <div className="show-mobile" style={{ display: 'none', alignItems: 'center', gap: 12 }}>
+          {user && (
+            <div ref={notifDropdownRefMobile} style={{ position: 'relative' }}>
+              <button
+                onClick={() => setIsNotifDropdownOpenMobile(!isNotifDropdownOpenMobile)}
+                style={{
+                  color: isNotifDropdownOpenMobile ? 'var(--miami-pink)' : 'rgba(226,232,240,0.65)',
+                  cursor: 'pointer',
+                  padding: 8,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  transition: 'color 0.2s',
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.05)'
+                }}
+                title="Notifications"
+              >
+                <Bell size={20} />
+                {unreadNotifCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: 2,
+                    right: 2,
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: 'var(--miami-pink)',
+                    boxShadow: '0 0 6px var(--miami-pink)'
+                  }} />
+                )}
+              </button>
+
+              {isNotifDropdownOpenMobile && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: -40,
+                  background: 'rgba(7, 6, 26, 0.98)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid var(--miami-border)',
+                  borderRadius: 14,
+                  padding: '12px 0',
+                  width: 280,
+                  boxShadow: '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 10, 94, 0.12)',
+                  zIndex: 1001,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  marginTop: 10
+                }}>
+                  <div style={{ padding: '4px 16px 8px', fontSize: '0.72rem', color: 'rgba(226,232,240,0.4)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>NOTIFICATIONS</span>
+                    {unreadNotifCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await markAllNotificationsAsRead();
+                            fetchUserNotifs();
+                          } catch (err) {
+                            console.error(err);
+                          }
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--miami-pink)',
+                          cursor: 'pointer',
+                          fontSize: '0.68rem',
+                          fontWeight: 'bold',
+                          padding: 0
+                        }}
+                      >
+                        Tout marquer comme lu
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column' }} className="scroll-mini">
+                    {userNotifications.length === 0 ? (
+                      <div style={{ padding: '24px 16px', color: 'rgba(226,232,240,0.4)', fontSize: '0.78rem', textAlign: 'center' }}>
+                        Aucune notification
+                      </div>
+                    ) : (
+                      userNotifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          style={{
+                            padding: '10px 16px',
+                            borderBottom: '1px solid rgba(255,255,255,0.02)',
+                            display: 'flex',
+                            gap: 8,
+                            alignItems: 'flex-start',
+                            background: notif.is_read ? 'transparent' : 'rgba(255, 45, 120, 0.03)',
+                            transition: 'background 0.2s',
+                            position: 'relative'
+                          }}
+                        >
+                          {!notif.is_read && (
+                            <span style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              background: 'var(--miami-pink)',
+                              marginTop: 6,
+                              flexShrink: 0
+                            }} />
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <Link
+                              href={notif.link || '/profile'}
+                              onClick={async () => {
+                                setIsNotifDropdownOpenMobile(false);
+                                if (!notif.is_read) {
+                                  try {
+                                    await markNotificationAsRead(notif.id);
+                                    fetchUserNotifs();
+                                  } catch (e) {
+                                    console.error(e);
+                                  }
+                                }
+                              }}
+                              style={{
+                                textDecoration: 'none',
+                                color: 'white',
+                                display: 'block'
+                              }}
+                            >
+                              <span style={{ fontWeight: 'bold', fontSize: '0.78rem', display: 'block', marginBottom: 2 }}>
+                                {notif.title}
+                              </span>
+                              <span style={{ color: 'rgba(226,232,240,0.6)', fontSize: '0.72rem', display: 'block', lineHeight: 1.3 }}>
+                                {notif.body}
+                              </span>
+                            </Link>
+                            <span style={{ fontSize: '0.62rem', color: 'rgba(226,232,240,0.3)', display: 'block', marginTop: 4 }}>
+                              {new Date(notif.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await deleteNotification(notif.id);
+                                fetchUserNotifs();
+                              } catch (e) {
+                                console.error(e);
+                              }
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'rgba(255,255,255,0.2)',
+                              cursor: 'pointer',
+                              padding: 4,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            title="Supprimer"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <button 
+            onClick={toggleMenu}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'white', 
+              cursor: 'pointer',
+              padding: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu Overlay */}
