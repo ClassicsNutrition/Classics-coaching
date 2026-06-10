@@ -38,6 +38,7 @@ export default function ProfileMorphologyForm({
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Check if profile is complete (essential info filled)
   const isComplete = height && weight && objective;
@@ -78,6 +79,7 @@ export default function ProfileMorphologyForm({
       if (error) throw error;
 
       setSuccess(true);
+      setIsEditing(false); // Return to read-only summary on save
       setTimeout(() => setSuccess(null), 3000);
       
       // Optionally trigger reload to refresh layout server components
@@ -89,6 +91,69 @@ export default function ProfileMorphologyForm({
       setSaving(false);
     }
   };
+
+  const objectiveLabel = OBJECTIVES.find(o => o.value === objective)?.label || objective;
+
+  if (isComplete && !isEditing) {
+    return (
+      <div className="card-glass animate-fadeInUp animate-delay-300" style={{ padding: 'clamp(24px, 4vw, 32px)', marginTop: 32 }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(0, 245, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--miami-cyan)' }}>
+              <Activity size={20} />
+            </div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: 'white', margin: 0 }}>
+              Profil Morphologique & Objectifs
+            </h2>
+          </div>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="btn-ghost"
+            style={{ padding: '8px 16px', fontSize: '0.8rem', borderColor: 'rgba(255,255,255,0.08)' }}
+          >
+            Modifier mes informations
+          </button>
+        </div>
+
+        {/* Info Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24, marginBottom: 20 }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: 16, borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.04)' }}>
+            <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', textTransform: 'uppercase', marginBottom: 4 }}>Taille</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'white' }}>{height} cm</span>
+          </div>
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: 16, borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.04)' }}>
+            <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', textTransform: 'uppercase', marginBottom: 4 }}>Poids</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'white' }}>{weight} kg</span>
+          </div>
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: 16, borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.04)' }}>
+            <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(226,232,240,0.4)', textTransform: 'uppercase', marginBottom: 4 }}>Objectif</span>
+            <span style={{ fontSize: '1.05rem', fontWeight: 700, color: 'white' }}>{objectiveLabel}</span>
+          </div>
+        </div>
+
+        {/* Text areas summaries */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {medicalHistory && (
+            <div>
+              <h4 style={{ fontSize: '0.8rem', color: 'rgba(226,232,240,0.5)', fontWeight: 600, margin: '0 0 6px 0', textTransform: 'uppercase' }}>Antécédents médicaux / Blessures / Limitations</h4>
+              <p style={{ fontSize: '0.875rem', color: 'rgba(226,232,240,0.85)', background: 'rgba(0,0,0,0.15)', padding: 14, borderRadius: 10, margin: 0, border: '1px solid rgba(255,255,255,0.03)', whiteSpace: 'pre-wrap' }}>
+                {medicalHistory}
+              </p>
+            </div>
+          )}
+          {sportsHistory && (
+            <div>
+              <h4 style={{ fontSize: '0.8rem', color: 'rgba(226,232,240,0.5)', fontWeight: 600, margin: '0 0 6px 0', textTransform: 'uppercase' }}>Antécédents sportifs / Expérience</h4>
+              <p style={{ fontSize: '0.875rem', color: 'rgba(226,232,240,0.85)', background: 'rgba(0,0,0,0.15)', padding: 14, borderRadius: 10, margin: 0, border: '1px solid rgba(255,255,255,0.03)', whiteSpace: 'pre-wrap' }}>
+                {sportsHistory}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card-glass animate-fadeInUp animate-delay-300" style={{ padding: 'clamp(24px, 4vw, 32px)', marginTop: 32 }}>
@@ -254,20 +319,35 @@ export default function ProfileMorphologyForm({
           </div>
         )}
 
-        {/* Submit */}
-        <button
-          type="submit"
-          className="btn-primary"
-          disabled={saving}
-          style={{
-            alignSelf: 'flex-end',
-            padding: '10px 24px',
-            fontSize: '0.85rem',
-            background: 'var(--miami-pink)'
-          }}
-        >
-          {saving ? 'Enregistrement...' : 'Sauvegarder le profil'}
-        </button>
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 12, alignSelf: 'flex-end' }}>
+          {isComplete && (
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="btn-ghost"
+              style={{
+                padding: '10px 24px',
+                fontSize: '0.85rem',
+                borderColor: 'rgba(255,255,255,0.08)'
+              }}
+            >
+              Annuler
+            </button>
+          )}
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={saving}
+            style={{
+              padding: '10px 24px',
+              fontSize: '0.85rem',
+              background: 'var(--miami-pink)'
+            }}
+          >
+            {saving ? 'Enregistrement...' : 'Sauvegarder le profil'}
+          </button>
+        </div>
       </form>
     </div>
   );
