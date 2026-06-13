@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { sendPushToUser } from '@/lib/webpush';
+import { encryptMessage, decryptMessage } from '@/lib/chat-crypto';
 
 // Helper to check if current user is admin
 async function isAdminUser() {
@@ -71,17 +72,22 @@ export async function sendChatMessage(roomId: string, message: string) {
   }
   
   // Insert the message
+  const encryptedMessage = encryptMessage(message);
   const { data: newMsg, error: mError } = await adminSupabase
     .from('chat_messages')
     .insert({
       room_id: roomId,
       sender_id: senderId,
-      message
+      message: encryptedMessage
     })
     .select('*')
     .single();
     
   if (mError) throw mError;
+  
+  if (newMsg) {
+    newMsg.message = decryptMessage(newMsg.message);
+  }
   
   // Update unread count & updated_at on the room
   const updates: any = { updated_at: new Date().toISOString() };
@@ -89,10 +95,8 @@ export async function sendChatMessage(roomId: string, message: string) {
     // Admin sent it -> increment user's unread count
     updates.user_unread_count = (room.user_unread_count || 0) + 1;
 
-    // Create a client notification
-    const truncatedBody = message.startsWith('[EXERCISE:') 
-      ? "Votre coach vous a partagé un exercice technique." 
-      : message.length > 50 ? message.substring(0, 50) + "..." : message;
+    // Create a client notification (generic message content to preserve end-to-end database privacy)
+    const truncatedBody = "Vous avez reçu un nouveau message de votre coach.";
 
     const { error: notifError } = await adminSupabase
       .from('user_notifications')
@@ -154,7 +158,14 @@ export async function getChatMessages(roomId: string) {
     .order('created_at', { ascending: true });
     
   if (error) throw error;
-  return messages;
+  
+  // Decrypt all retrieved messages
+  const decryptedMessages = (messages || []).map((msg: any) => ({
+    ...msg,
+    message: decryptMessage(msg.message)
+  }));
+  
+  return decryptedMessages;
 }
 
 // 4. Mark room as read
@@ -243,13 +254,14 @@ export async function getAdminChatRooms() {
       .limit(1);
       
     const lastMsg = lastMsgs?.[0] || null;
+    const lastMsgText = lastMsg?.message ? decryptMessage(lastMsg.message) : null;
     
     return {
       ...room,
       user_name: profile?.full_name || authUser?.email?.split('@')[0] || 'Client',
       user_email: authUser?.email || 'Inconnu',
       user_avatar: profile?.avatar_url || null,
-      last_message: lastMsg?.message || null,
+      last_message: lastMsgText,
       last_message_time: lastMsg?.created_at || room.updated_at,
       last_message_sender: lastMsg?.sender_id || null
     };
