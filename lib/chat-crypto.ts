@@ -41,7 +41,7 @@ export function decryptMessage(text: string): string {
   try {
     const key = getSecretKey();
     const iv = Buffer.from(parts[0], 'hex');
-    const encryptedText = Buffer.from(parts[1], 'hex');
+    const encryptedText = parts[1];
     
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
