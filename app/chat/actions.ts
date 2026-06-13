@@ -309,7 +309,7 @@ export async function getExercisesList() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('exercises')
-    .select('id, name, muscle_group, gif_url, instructions')
+    .select('id, name, muscle_group, gif_url')
     .order('name', { ascending: true });
     
   if (error) throw error;

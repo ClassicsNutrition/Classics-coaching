@@ -16,10 +16,10 @@ export default async function ExercisesPage() {
     isAdmin = profile?.role === 'admin';
   }
 
-  // Fetch all exercises from Supabase
+  // Fetch all exercises from Supabase (excluding instructions to speed up initial load)
   const { data: dbExercises } = await supabase
     .from('exercises')
-    .select('*')
+    .select('id, name, gif_url, muscle_group, created_at')
     .order('name', { ascending: true });
 
   const exercises = dbExercises || [];

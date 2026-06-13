@@ -7,6 +7,7 @@ import {
   sendChatMessage, markChatAsRead,
   getExercisesList
 } from '@/app/chat/actions';
+import { createClient } from '@/lib/supabase/client';
 
 const UNIQUE_EMOJIS = [
   '💪', '🏋️‍♂️', '🏃‍♂️', '🧘‍♂️', '🥗', '🍎', '🥦',
@@ -234,7 +235,25 @@ export default function ProfileChat() {
                       
                       <button
                         type="button"
-                        onClick={() => setActiveExercise(exercise)}
+                        onClick={async () => {
+                          setActiveExercise(exercise);
+                          if (exercise && !exercise.instructions) {
+                            try {
+                              const supabase = createClient();
+                              const { data, error } = await supabase
+                                .from('exercises')
+                                .select('instructions')
+                                .eq('id', exercise.id)
+                                .single();
+                              if (data && !error) {
+                                setActiveExercise(prev => prev && prev.id === exercise.id ? { ...prev, instructions: data.instructions } : prev);
+                                exercise.instructions = data.instructions;
+                              }
+                            } catch (err) {
+                              console.error("Error fetching exercise instructions:", err);
+                            }
+                          }
+                        }}
                         className="btn-ghost"
                         style={{
                           width: '100%',

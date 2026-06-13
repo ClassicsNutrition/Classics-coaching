@@ -22,10 +22,10 @@ export default async function HomePage() {
     .select('id, title, slug, description, cover_url')
     .eq('published', true);
 
-  // Fetch all exercises
+  // Fetch all exercises (excluding instructions for optimal loading performance)
   const { data: dbExercises } = await supabase
     .from('exercises')
-    .select('*')
+    .select('id, name, gif_url, muscle_group, created_at')
     .order('name', { ascending: true });
 
   const programs = dbPrograms || [];

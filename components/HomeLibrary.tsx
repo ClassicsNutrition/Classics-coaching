@@ -328,7 +328,24 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
                   {filteredExercises.slice(0, visibleCount).map(ex => (
                     <div
                       key={ex.id}
-                      onClick={() => setActiveExercise(ex)}
+                       onClick={async () => {
+                        setActiveExercise(ex);
+                        if (!ex.instructions) {
+                          try {
+                            const { data, error } = await supabase
+                              .from('exercises')
+                              .select('instructions')
+                              .eq('id', ex.id)
+                              .single();
+                            if (data && !error) {
+                              setActiveExercise(prev => prev && prev.id === ex.id ? { ...prev, instructions: data.instructions } : prev);
+                              ex.instructions = data.instructions;
+                            }
+                          } catch (err) {
+                            console.error("Error fetching instructions on demand:", err);
+                          }
+                        }
+                      }}
                       className="hover-lift"
                       style={{
                         background: 'rgba(255, 255, 255, 0.02)',
