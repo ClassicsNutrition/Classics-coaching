@@ -246,7 +246,7 @@ export default function ProfileChat() {
                                 .eq('id', exercise.id)
                                 .single();
                               if (data && !error) {
-                                setActiveExercise(prev => prev && prev.id === exercise.id ? { ...prev, instructions: data.instructions } : prev);
+                                setActiveExercise((prev: any) => prev && prev.id === exercise.id ? { ...prev, instructions: data.instructions } : prev);
                                 exercise.instructions = data.instructions;
                               }
                             } catch (err) {

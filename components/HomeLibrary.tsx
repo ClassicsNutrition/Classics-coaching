@@ -338,7 +338,7 @@ export default function HomeLibrary({ programs, exercises, user, initialFavorite
                               .eq('id', ex.id)
                               .single();
                             if (data && !error) {
-                              setActiveExercise(prev => prev && prev.id === ex.id ? { ...prev, instructions: data.instructions } : prev);
+                              setActiveExercise((prev: any) => prev && prev.id === ex.id ? { ...prev, instructions: data.instructions } : prev);
                               ex.instructions = data.instructions;
                             }
                           } catch (err) {
